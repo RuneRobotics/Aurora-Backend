@@ -3,7 +3,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export enum LayoutType {
   FIELD,
   CAM,
-  BOTH,
 }
 export enum ScreenSide {
   LEFT = 1,
@@ -16,9 +15,9 @@ export interface LayoutState {
 }
 
 const initialState: LayoutState = {
-  layoutType: LayoutType.BOTH,
+  layoutType: LayoutType.CAM,
   sideCams: true,
-  screenSide: ScreenSide.LEFT,
+  screenSide: ScreenSide.RIGHT,
 };
 
 const layoutSlice = createSlice({

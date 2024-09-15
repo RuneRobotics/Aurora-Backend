@@ -2,6 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import { styled } from "@mui/system";
 import SideCams from "../components/side_cams/SideCams";
+import MainDisplay from "../components/main/MainDisplay";
 const Item = styled(Box)(({ theme }) => ({
   backgroundColor: "white",
   borderRadius: theme.shape.borderRadius,
@@ -26,7 +27,8 @@ export const DashBoardGrid = styled(Box)(() => ({
 const DashBoard: React.FC = () => {
   return (
     <DashBoardGrid>
-      <SideCams></SideCams>
+      <SideCams />
+      <MainDisplay />
     </DashBoardGrid>
   );
 };

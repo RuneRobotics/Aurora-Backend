@@ -1,12 +1,14 @@
 // src/redux/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import layoutReducer from "./slices/LayoutSlice";
-import camerReducer from "./slices/CameraSlice";
+import camerasReducer from "./slices/CameraSlice";
+import dataReducer from "./slices/DataSlice";
 
 export const store = configureStore({
   reducer: {
     layout: layoutReducer,
-    cameras: camerReducer,
+    cameras: camerasReducer,
+    data: dataReducer,
   },
 });
 

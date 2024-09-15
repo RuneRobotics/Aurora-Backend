@@ -5,7 +5,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Device } from "../../state/slices/CameraSlice";
-import Camera from "./Camera";
+import CameraAccordion from "./CamerAccordion";
 
 const DeviceDisplay: React.FC<Device> = ({ IP, cameraAmount }: Device) => {
   return (
@@ -23,7 +23,7 @@ const DeviceDisplay: React.FC<Device> = ({ IP, cameraAmount }: Device) => {
         }}
       >
         {Array.from({ length: cameraAmount }, (_, index) => (
-          <Camera key={index} cameraIndex={index} deviceIP={IP} />
+          <CameraAccordion key={index} cameraIndex={index} deviceIP={IP} />
         ))}
       </AccordionDetails>
     </Accordion>

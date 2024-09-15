@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -7,31 +7,17 @@ import {
   Box,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Camera from "../Camera";
 
 interface CameraProps {
   deviceIP: string;
   cameraIndex: number;
 }
 
-const Camera: React.FC<CameraProps> = ({
+const CameraAccordion: React.FC<CameraProps> = ({
   deviceIP,
   cameraIndex,
 }: CameraProps) => {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        })
-        .catch((err) => console.error("Error accessing webcam: ", err));
-    }
-  }, []);
-
   return (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -47,15 +33,10 @@ const Camera: React.FC<CameraProps> = ({
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={{ width: "100%", borderRadius: "8px" }}
-        />
+        <Camera />
       </AccordionDetails>
     </Accordion>
   );
 };
 
-export default Camera;
+export default CameraAccordion;
