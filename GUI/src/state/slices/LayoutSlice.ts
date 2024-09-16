@@ -15,7 +15,7 @@ export interface LayoutState {
 }
 
 const initialState: LayoutState = {
-  layoutType: LayoutType.CAM,
+  layoutType: LayoutType.FIELD,
   sideCams: true,
   screenSide: ScreenSide.RIGHT,
 };

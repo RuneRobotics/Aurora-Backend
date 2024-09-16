@@ -23,6 +23,7 @@ const Container = styled(Box, {
 const MainDisplay: React.FC = () => {
   const side = useSelector((state: State) => state.layout.screenSide);
   const layoutType = useSelector((state: State) => state.layout.layoutType);
+  console.log("main rendered");
   return (
     <Container side={side}>
       {layoutType === LayoutType.CAM ? <Camera /> : <Field></Field>}{" "}
