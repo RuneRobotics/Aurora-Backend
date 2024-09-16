@@ -8,7 +8,7 @@ import Field from "./field/Field";
 const Container = styled(Box, {
   shouldForwardProp: (prop) => prop !== "side",
 })<{ side: number }>(({ theme, side }) => ({
-  backgroundColor: "green",
+  backgroundColor: "black",
   borderRadius: theme.shape.borderRadius,
   margin: 0,
   padding: 2,

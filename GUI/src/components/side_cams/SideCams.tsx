@@ -1,4 +1,4 @@
-import { Box, styled } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { State } from "../../state/state";
 import DeviceDisplay from "./DeviceDisplay";
@@ -6,7 +6,7 @@ import DeviceDisplay from "./DeviceDisplay";
 const Container = styled(Box, {
   shouldForwardProp: (prop) => prop !== "side",
 })<{ side: number }>(({ theme, side }) => ({
-  backgroundColor: "white",
+  backgroundColor: "424242",
   borderRadius: theme.shape.borderRadius,
   margin: 0,
   padding: 0,
@@ -28,6 +28,7 @@ const SideCams: React.FC = () => {
   if (exist)
     return (
       <Container side={side}>
+        <Typography variant="h3">Devices</Typography>
         {devices.map((device, index) => (
           <DeviceDisplay
             key={index}

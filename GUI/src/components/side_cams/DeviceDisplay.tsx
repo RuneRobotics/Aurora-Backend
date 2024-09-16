@@ -12,14 +12,16 @@ const DeviceDisplay: React.FC<Device> = ({ IP, cameraAmount }: Device) => {
     <Accordion>
       <AccordionSummary
         sx={{
-          backgroundColor: "green",
+          backgroundColor: "black",
         }}
       >
-        <Typography variant="h5">Device IP: {IP}</Typography>
+        <Typography variant="h5" color="white">
+          Device IP: {IP}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails
         sx={{
-          backgroundColor: "green",
+          backgroundColor: "black",
         }}
       >
         {Array.from({ length: cameraAmount }, (_, index) => (

@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Camera from "../Camera";
+import NotesTable from "./NoteAccordion";
+import AprilTagTable from "./AprilTagAccordion";
 
 interface CameraProps {
   deviceIP: string;
@@ -34,6 +36,14 @@ const CameraAccordion: React.FC<CameraProps> = ({
       </AccordionSummary>
       <AccordionDetails>
         <Camera />
+        <NotesTable
+          selectedCameraDeviceIP={deviceIP}
+          selectedCameraIndex={cameraIndex}
+        />
+        <AprilTagTable
+          selectedCameraDeviceIP={deviceIP}
+          selectedCameraIndex={cameraIndex}
+        />
       </AccordionDetails>
     </Accordion>
   );

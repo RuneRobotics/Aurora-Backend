@@ -55,7 +55,102 @@ const initialState: Data = {
     {
       x: 1,
       y: 2,
-      cameras: [],
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+        {
+          camera: {
+            selectedCameraDeviceIP: "2",
+            selectedCameraIndex: 2,
+          },
+          certainty: 0.6,
+        },
+      ],
+    },
+    {
+      x: 1,
+      y: 2,
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+        {
+          camera: {
+            selectedCameraDeviceIP: "2",
+            selectedCameraIndex: 2,
+          },
+          certainty: 0.6,
+        },
+      ],
+    },
+    {
+      x: 1,
+      y: 2,
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+        {
+          camera: {
+            selectedCameraDeviceIP: "2",
+            selectedCameraIndex: 2,
+          },
+          certainty: 0.6,
+        },
+      ],
+    },
+    {
+      x: 1,
+      y: 2,
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+        {
+          camera: {
+            selectedCameraDeviceIP: "2",
+            selectedCameraIndex: 2,
+          },
+          certainty: 0.6,
+        },
+      ],
+    },
+    {
+      x: 1,
+      y: 2,
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+        {
+          camera: {
+            selectedCameraDeviceIP: "2",
+            selectedCameraIndex: 2,
+          },
+          certainty: 0.6,
+        },
+      ],
     },
     {
       x: 3,
@@ -114,7 +209,15 @@ const initialState: Data = {
       roll: 0,
       pitch: 0,
       yaw: 2,
-      cameras: [],
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+      ],
     },
     {
       id: 0,
@@ -124,7 +227,15 @@ const initialState: Data = {
       roll: 0,
       pitch: 0,
       yaw: 2,
-      cameras: [],
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+      ],
     },
     {
       id: 0,
@@ -134,7 +245,15 @@ const initialState: Data = {
       roll: 0,
       pitch: 0,
       yaw: 0,
-      cameras: [],
+      cameras: [
+        {
+          camera: {
+            selectedCameraDeviceIP: "0",
+            selectedCameraIndex: 0,
+          },
+          certainty: 0.9,
+        },
+      ],
     },
   ],
   pose: {

@@ -78,7 +78,7 @@ const drawAprilTag = (
   ctx.lineTo(normalX(position.x), normalY(position.y));
   ctx.stroke();
   ctx.beginPath();
-  drawRectangle(position.x, position.y, position.rotation, "white", radius);
+  drawRectangle(position.x, position.y, position.rotation, "grey", radius);
   drawRectangle(
     position.x,
     position.y,
