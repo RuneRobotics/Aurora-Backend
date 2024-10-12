@@ -40,10 +40,6 @@ class YOLOv8Detector:
 
         return image
 
-def save_data(file_path, data):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
-
 def detect_objects(yolo_detector, frame):
     
     bboxes, scores, class_ids = yolo_detector.detect(frame)
@@ -59,42 +55,5 @@ def detect_objects(yolo_detector, frame):
 
     return detection_data, output_frame
 
-def open_stream(port: int):
-
-    cap = cv2.VideoCapture(port)
-
-    if not cap.isOpened():
-        print("Error: Could not open video stream from webcam.")
-        exit()
-    
-    return cap
-
 def object_detection_process(port, path: str):
-    yolo_detector = YOLOv8Detector(os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt'))
-    
-    cap = open_stream(port)
-    
-    data_file = path
-
-    while True:
-        ret, frame = cap.read()
-
-        if not ret:
-            print("Error: Failed to capture image from webcam.")
-            break
-
-        detection_data, output_frame = detect_objects(yolo_detector=yolo_detector, frame=frame)
-
-        cv2.imshow('YOLOv8 Webcam Detection', output_frame)
-
-        # Save data to JSON file after processing the frame
-        save_data(data_file, detection_data)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    object_detection_process(0, os.path.join(os.path.dirname(__file__), '..', 'output', 'data.json'))
+    pass

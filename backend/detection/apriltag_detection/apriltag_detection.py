@@ -18,26 +18,9 @@ def load_json(path: str):
         data = json.load(file)
     return data
 
-
-json_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'apriltag_data', 'apriltags_layout.json')
-field_data = load_json(json_file_path)
-
-camera_matrix = get_camera_matrix()
-dist_coeffs = get_camera_dist_coeffs()
-
-detector = apriltag.Detector(families='tag36h11')
-
-cap = cv2.VideoCapture(0)
-
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Detect AprilTags in the image
-    detections = detector.detect(gray)
+def detect_ats(frame, detector):
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    detections = detector.detect(gray_frame)
 
     world_points = []
     image_points = []
@@ -50,13 +33,4 @@ while True:
         corners_int = np.array(detection.corners, dtype=np.int32)
         cv2.polylines(frame, [corners_int.reshape((-1, 1, 2))], isClosed=True, color=(0, 255, 0), thickness=2)
 
-        # Display the frame
-    cv2.imshow("Detected AprilTags", frame)
-
-    # Break loop if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release the capture and close windows
-cap.release()
-cv2.destroyAllWindows()
+    return detections
