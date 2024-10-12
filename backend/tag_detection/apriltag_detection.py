@@ -4,34 +4,29 @@ import pyapriltags as apriltag
 import json
 import os
 
+def get_camera_matrix():
+    return np.array([[600, 0, 320],  # fx, 0, cx
+                          [0, 600, 240],  # 0, fy, cy
+                          [0, 0, 1]], dtype=np.float32)
+
+def get_camera_dist_coeffs():
+    return np.zeros((4, 1))
+
+
 def load_json(path: str):
     with open(path, 'r') as file:
         data = json.load(file)
     return data
 
+
 json_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'apriltag_data', 'apriltags_layout.json')
-world_data = load_json(json_file_path)
+field_data = load_json(json_file_path)
 
-# Function to convert quaternion to rotation matrix
-def quaternion_to_rotation_matrix(q):
-    w, x, y, z = q['W'], q['X'], q['Y'], q['Z']
-    rot_matrix = np.array([
-        [1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
-        [2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x],
-        [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y]
-    ], dtype=np.float32)
-    return rot_matrix
+camera_matrix = get_camera_matrix()
+dist_coeffs = get_camera_dist_coeffs()
 
-# Define the camera matrix (example values, replace with actual calibration values)
-camera_matrix = np.array([[600, 0, 320],  # fx, 0, cx
-                          [0, 600, 240],  # 0, fy, cy
-                          [0, 0, 1]], dtype=np.float32)
-dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
-
-# Initialize the AprilTag detector
 detector = apriltag.Detector(families='tag36h11')
 
-# Capture from camera
 cap = cv2.VideoCapture(0)
 
 while True:
