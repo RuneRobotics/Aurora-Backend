@@ -1,14 +1,7 @@
 import cv2
 import numpy as np
 import json
-
-def get_camera_matrix():
-    return np.array([[600, 0, 320],  # fx, 0, cx
-                          [0, 600, 240],  # 0, fy, cy
-                          [0, 0, 1]], dtype=np.float32)
-
-def get_camera_dist_coeffs():
-    return np.zeros((4, 1))
+from camera import Camera
 
 def load_json(path: str):
     with open(path, 'r') as file:
@@ -18,12 +11,12 @@ def load_json(path: str):
 def calculate_position():
     pass
 
-def detect_ats(frame, detector, field_data):
+def detect_ats(frame, detector, field_data, camera: Camera):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     detections = detector.detect(gray_frame)
 
-    camera_matrix = get_camera_matrix()
-    dist_coeffs = get_camera_dist_coeffs()
+    camera_matrix = camera.matrix
+    dist_coeffs = camera.dist_coeffs
 
     world_points = []
     image_points = []

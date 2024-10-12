@@ -5,12 +5,13 @@ import cv2
 import json
 import pyapriltags as apriltag
 import logging
+from camera import Camera
 
 logging.getLogger("ultralytics").setLevel(logging.WARNING)
 
-def open_stream(port: int):
+def open_stream(camera: Camera):
 
-    cap = cv2.VideoCapture(port)
+    cap = cv2.VideoCapture(camera.port)
 
     if not cap.isOpened():
         print("Error: Could not open video stream from webcam.")
@@ -22,9 +23,9 @@ def save_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def detection_process(port, output_file_path: str):
+def detection_process(camera: Camera, output_file_path: str):
     object_detector = ObjectDetector(os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt'), [3] , 0.6)
-    cap = open_stream(port)
+    cap = open_stream(camera)
     output_file = output_file_path
 
     field_data = load_json(os.path.join(os.path.dirname(__file__), '..', 'data', 'apriltag_data', 'apriltags_layout.json'))
@@ -37,7 +38,7 @@ def detection_process(port, output_file_path: str):
             print("Error: Failed to capture image from webcam.")
             break
 
-        at_detection_data = detect_ats(frame=frame, detector=at_detector, field_data=field_data)
+        at_detection_data = detect_ats(frame=frame, detector=at_detector, field_data=field_data, camera=camera)
         object_detection_data, output_frame = detect_objects(object_detector=object_detector, frame=frame)
         
 
@@ -52,4 +53,5 @@ def detection_process(port, output_file_path: str):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    detection_process(0, os.path.join(os.path.dirname(__file__), '..', 'output', 'output.json'))
+    camera = Camera(port=0, position=None)
+    detection_process(camera=camera, output_file_path=os.path.join(os.path.dirname(__file__), '..', 'output', 'output.json'))
