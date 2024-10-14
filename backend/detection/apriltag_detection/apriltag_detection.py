@@ -20,6 +20,7 @@ def detect_ats(frame, detector, field_data, camera: Camera):
 
     world_points = []
     image_points = []
+    detected_atags = []
 
     for detection in detections:
         tag_id = detection.tag_id
@@ -29,4 +30,6 @@ def detect_ats(frame, detector, field_data, camera: Camera):
         corners_int = np.array(detection.corners, dtype=np.int32)
         cv2.polylines(frame, [corners_int.reshape((-1, 1, 2))], isClosed=True, color=(0, 255, 0), thickness=2)
 
-    return {}
+        detected_atags.append({"id": tag_id, "corners": image_corners, "distance": 0})
+
+    return {"april tags": detected_atags}

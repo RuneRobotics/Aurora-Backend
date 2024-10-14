@@ -38,7 +38,10 @@ def detect_objects(object_detector, frame):
     
     bboxes, scores, class_ids = object_detector.detect(frame)
 
-    notes_data = {"notes": [{"x": (xyxy[0][0] + xyxy[0][2]) / 2, "y": (xyxy[0][1] + xyxy[0][3]) / 2, "score": score} for xyxy, score in zip(bboxes, scores)]}
+    notes_data = {"notes": [{"x": round((xyxy[0][0] + xyxy[0][2]) / 2, 4), 
+                             "y": round((xyxy[0][1] + xyxy[0][3]) / 2, 4), 
+                             "score": round(score, 4)} 
+                             for xyxy, score in zip(bboxes, scores)]}
 
     output_frame = object_detector.draw_detections(frame, bboxes, scores, class_ids)
 
