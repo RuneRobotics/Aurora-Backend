@@ -5,7 +5,7 @@ import cv2
 import json
 import pyapriltags as apriltag
 import logging
-from camera import Camera
+from camera import Camera, Pose3D
 
 logging.getLogger("ultralytics").setLevel(logging.WARNING)
 
@@ -39,7 +39,7 @@ def detection_process(camera: Camera, output_file_path: str):
             break
 
         at_detection_data = detect_ats(frame=frame, detector=at_detector, field_data=field_data, camera=camera)
-        object_detection_data, output_frame = detect_objects(object_detector=object_detector, frame=frame)
+        object_detection_data, output_frame = detect_objects(camera, object_detector=object_detector, frame=frame)
         
 
         cv2.imshow('YOLOv8 Webcam Detection', output_frame)
@@ -53,5 +53,6 @@ def detection_process(camera: Camera, output_file_path: str):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    camera = Camera(port=0, position=None)
+    pose = Pose3D()
+    camera = Camera(port=0, position=pose)
     detection_process(camera=camera, output_file_path=os.path.join(os.path.dirname(__file__), '..', 'output', 'output.json'))

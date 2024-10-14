@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import cv2
-from camera import Camera
+from camera import Camera, position_relative_to_camera
+
 class ObjectDetector:
     def __init__(self, model_path, camera: Camera, valid_ids, conf_limit=0):
         self.model = YOLO(model_path)
@@ -36,25 +37,22 @@ class ObjectDetector:
 
         return image
 
-def convert_to_robot_space(xyxy, camera: Camera):
-    camera_x = x = (xyxy[0][0] + xyxy[0][2]) / 2
-    camera_y = (xyxy[0][1] + xyxy[0][3]) / 2
+def convert_to_robot_space(point):
+    # some conversion here
+    return (point[0], point[1])
 
-    # convert here
-    x = camera_x
-    y = camera_y
-
-    return (round(x, 4), round(y, 4))
-
-def detect_objects(object_detector, frame):
+def detect_objects(camera: Camera, object_detector, frame):
     
     bboxes, scores, class_ids = object_detector.detect(frame)
 
-    robot_coords = [convert_to_robot_space(xyxy, object_detector.camera) for xyxy in bboxes]
-
-    notes_data = {"notes": [{"x": x, "y": y, "score": round(score, 4)} 
+    robot_coords = [position_relative_to_camera(camera, 
+                                                ((xyxy[0][0] + xyxy[0][2]) / 2, 
+                                                 (xyxy[0][1] + xyxy[0][3]) / 2), 
+                                                 0.05) for xyxy in bboxes]
+    
+    notes_data = {"notes": [{"x": float(x), "y": float(y), "score": round(score, 4)} 
                             for (x, y), score in zip(robot_coords, scores)]}
-
+    print(notes_data)
     output_frame = object_detector.draw_detections(frame, bboxes, scores, class_ids)
 
     detection_data = notes_data # | robot_data | etc...
