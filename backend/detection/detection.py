@@ -24,7 +24,7 @@ def save_data(file_path, data):
         json.dump(data, file, indent=4)
 
 def detection_process(camera: Camera, output_file_path: str):
-    object_detector = ObjectDetector(os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt'), [3] , 0.6)
+    object_detector = ObjectDetector(os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt'), camera=camera, valid_ids=[3] , conf_limit=0.6)
     cap = open_stream(camera)
     output_file = output_file_path
 
