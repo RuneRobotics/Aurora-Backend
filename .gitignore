@@ -1,0 +1,108 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+*.egg
+dist/
+build/
+*.pyc
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# React
+build/
+*.log
+
+# Logs
+logs/
+*.log
+*.tlog
+*.out
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm/
+
+# Typescript
+*.tsbuildinfo
+
+# Production
+/build
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# MacOS
+.DS_Store
+
+# Coverage reports
+coverage/
+*.lcov
+
+# pytest
+.cache/
+
+# MyPy
+.mypy_cache/
+
+# Environments
+.env
+.env.local
+.env.*.local
+env/
+venv/
+venv.bak/
+venv.bak/
+
+# Lint
+.eslintcache
+.pylint.d/
+
+# Editor artifacts
+*.sublime-workspace
+*.sublime-project
+
+# Test logs
+test-results/
+
+# Webpack
+dist/
+.terraform/
