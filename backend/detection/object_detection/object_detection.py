@@ -45,14 +45,11 @@ def detect_objects(camera: Camera, object_detector, frame):
     
     bboxes, scores, class_ids = object_detector.detect(frame)
 
-    robot_coords = [position_relative_to_camera(camera, 
-                                                ((xyxy[0][0] + xyxy[0][2]) / 2, 
-                                                 (xyxy[0][1] + xyxy[0][3]) / 2), 
-                                                 0.05) for xyxy in bboxes]
+    robot_coords = [position_relative_to_camera(camera, xyxy, 0.05) for xyxy in bboxes]
     
-    notes_data = {"notes": [{"x": float(x), "y": float(y), "score": round(score, 4)} 
+    notes_data = {"notes": [{"x": round(float(x), 4), "y": round(float(y), 4), "score": round(score, 4)} 
                             for (x, y), score in zip(robot_coords, scores)]}
-    print(notes_data)
+    
     output_frame = object_detector.draw_detections(frame, bboxes, scores, class_ids)
 
     detection_data = notes_data # | robot_data | etc...

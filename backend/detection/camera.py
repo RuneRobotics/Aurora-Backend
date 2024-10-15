@@ -34,8 +34,8 @@ class Camera:
 
 import numpy as np
 
-def position_relative_to_camera(camera: Camera, pixel_coords, known_y):
-
+def position_relative_to_camera(camera: Camera, xyxy, known_y):
+    pixel_coords = ((xyxy[0][0] + xyxy[0][2]) / 2, (xyxy[0][1] + xyxy[0][3]) / 2)
     np.array([[pixel_coords]], dtype=np.float32)
 
     undistorted_point = cv2.undistortPoints(pixel_coords, camera.matrix, camera.dist_coeffs)

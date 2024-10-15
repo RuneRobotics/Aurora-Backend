@@ -41,7 +41,6 @@ def detection_process(camera: Camera, output_file_path: str):
         at_detection_data = detect_ats(frame=frame, detector=at_detector, field_data=field_data, camera=camera)
         object_detection_data, output_frame = detect_objects(camera, object_detector=object_detector, frame=frame)
         
-
         cv2.imshow('YOLOv8 Webcam Detection', output_frame)
 
         save_data(output_file, object_detection_data | at_detection_data)
