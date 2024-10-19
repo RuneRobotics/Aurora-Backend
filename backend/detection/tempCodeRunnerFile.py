@@ -1,1 +1,1 @@
-os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt')
+import pyapriltags as apriltag

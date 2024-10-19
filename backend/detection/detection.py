@@ -1,4 +1,4 @@
-from apriltag_detection.apriltag_detection import load_json, detect_ats
+from apriltag_detection.apriltag_detection import detect_ats
 from object_detection.object_detection import ObjectDetector, detect_objects
 import os
 import cv2
@@ -8,6 +8,11 @@ import logging
 from camera import Camera, Pose3D
 
 logging.getLogger("ultralytics").setLevel(logging.WARNING)
+
+def load_json(path: str):
+    with open(path, 'r') as file:
+        data = json.load(file)
+    return data
 
 def open_stream(camera: Camera):
 
