@@ -32,8 +32,6 @@ class Camera:
         
         return undistorted_points[0][0]  # Return the undistorted point
 
-import numpy as np
-
 def position_relative_to_camera(camera: Camera, xyxy, known_y):
     pixel_coords = ((xyxy[0][0] + xyxy[0][2]) / 2, (xyxy[0][1] + xyxy[0][3]) / 2)
     np.array([[pixel_coords]], dtype=np.float32)

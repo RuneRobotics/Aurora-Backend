@@ -2,9 +2,12 @@ import cv2
 import numpy as np
 import json
 import os
-from camera import Camera, position_relative_to_camera
+from camera import Camera
 import math
 import pyapriltags as apriltag
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_camera_pose(tag_world_corners, tag_image_corners, camera_matrix, dist_coeffs):
     success, rvec, tvec = cv2.solvePnP(tag_world_corners, tag_image_corners, camera_matrix, dist_coeffs)
@@ -81,7 +84,13 @@ def detect_ats(frame, detector, field_data, camera: Camera):
 
     for detection in detections:
         tag_id = detection.tag_id
-        tag_pose = field_data["tags"][tag_id - 1]["pose"]
+
+        try:
+            tag_pose = field_data["tags"][tag_id - 1]["pose"]
+        except IndexError:
+            logging.error(f"Error: tag_id {tag_id} is out of bounds.")
+            continue
+
         tag_x_world = tag_pose["translation"]["x"]
         tag_y_world = tag_pose["translation"]["y"]
         tag_z_world = tag_pose["translation"]["z"]
@@ -91,11 +100,11 @@ def detect_ats(frame, detector, field_data, camera: Camera):
 
         tag_world_corners = compute_tag_world_corners(tag_x_world, tag_y_world, tag_z_world, tag_theta_world, tag_half_size)
 
-        print(tag_world_corners)
-        print(tag_image_corners)
-        print("##################################")
-
-        camera_position, euler_angles = get_camera_pose(tag_world_corners, tag_image_corners, camera_matrix, dist_coeffs)
+        try:
+            camera_position, euler_angles = get_camera_pose(tag_world_corners, tag_image_corners, camera_matrix, dist_coeffs)
+        except Exception as e:
+            logging.error(f"Error: {e}. An exception occurred while attempting to solve PnP.")
+            continue
 
         camera_x_world, camera_y_world, camera_z_world = camera_position
         camera_roll_world, camera_pitch_world, camera_yaw_world = euler_angles
