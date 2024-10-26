@@ -106,3 +106,6 @@ test-results/
 # Webpack
 dist/
 .terraform/
+
+# Downloads
+Downloads/

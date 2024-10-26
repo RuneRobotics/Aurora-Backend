@@ -32,21 +32,15 @@ class Camera:
         
         return undistorted_points[0][0]  # Return the undistorted point
 
-def position_relative_to_camera(camera: Camera, xyxy, known_y):
-    pixel_coords = ((xyxy[0][0] + xyxy[0][2]) / 2, (xyxy[0][1] + xyxy[0][3]) / 2)
-    np.array([[pixel_coords]], dtype=np.float32)
+def distance_to_camera(camera: Camera, bbox, object_width):
 
-    undistorted_point = cv2.undistortPoints(pixel_coords, camera.matrix, camera.dist_coeffs)
+    camera_matrix = camera.matrix
 
-    camera_matrix_inv = np.linalg.inv(camera.matrix)
-    undistorted_point_homog = np.array([undistorted_point[0][0][0], undistorted_point[0][0][1], 1])
-    
-    s = known_y / undistorted_point_homog[1]
-    
-    # Step 3: Compute the world coordinates
-    world_coords = s * camera_matrix_inv.dot(undistorted_point_homog)
-    
-    # Set the y-value in the result to the known y_world
-    return (world_coords[0], world_coords[2])
+    xmin, ymin, xmax, ymax = bbox
+    object_width_pixel = xmax - xmin
 
+    focal_length = camera_matrix[0, 0]
 
+    distance = (focal_length * object_width) / object_width_pixel
+
+    return distance

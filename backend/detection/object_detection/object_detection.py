@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import cv2
-from camera import Camera, position_relative_to_camera
+from camera import Camera, distance_to_camera
 
 class ObjectDetector:
     def __init__(self, model_path, camera: Camera, valid_ids, conf_limit=0):
@@ -44,14 +44,14 @@ def convert_to_robot_space(point):
 def detect_objects(camera: Camera, object_detector, frame):
     
     bboxes, scores, class_ids = object_detector.detect(frame)
-
-    robot_coords = [position_relative_to_camera(camera, xyxy, 0.05) for xyxy in bboxes]
+    """
+    objects_coords = [distance_to_camera(camera, xyxy, 0.05) for xyxy in bboxes]
     
     notes_data = {"notes": [{"x": round(float(x), 4), "y": round(float(y), 4), "score": round(score, 4)} 
-                            for (x, y), score in zip(robot_coords, scores)]}
-    
+                            for (x, y), score in zip(objects_coords, scores)]}
+    """
     output_frame = object_detector.draw_detections(frame, bboxes, scores, class_ids)
-
-    detection_data = notes_data # | robot_data | etc...
+    
+    detection_data = {} # notes_data # | robot_data | etc...
 
     return detection_data, output_frame
