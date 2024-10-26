@@ -81,6 +81,7 @@ def detect_ats(frame, detector, field_data, camera: Camera):
     tag_half_size = 0.5 * ((6.5 * 2.54) / 100)  # Convert from inches to meters
 
     detected_atags = []
+    pose = {}
 
     for detection in detections:
         tag_id = detection.tag_id
@@ -114,6 +115,7 @@ def detect_ats(frame, detector, field_data, camera: Camera):
 
         detected_atags.append({
             "id": tag_id, 
+            # need to add here robot position calculation
             "camera_position": {"x": camera_x_world, 
                                 "y": camera_y_world, 
                                 "z": camera_z_world, 
@@ -127,4 +129,8 @@ def detect_ats(frame, detector, field_data, camera: Camera):
             "total_distance": np.sqrt(dist_x**2 + dist_y**2 + dist_z**2)
         })
 
-    return {"april_tags": detected_atags, "robot_location": {"x": 0, "y": 0, "z": 0}}
+        fake_data = {"length": 0.6, "width": 0.6, "cameras": []}
+        if len(detected_atags) > 0:
+            pose = detected_atags[0]["camera_position"] | fake_data
+
+    return {"pose": pose, "aprilTags": []} |  {"aprilTags": detected_atags, "robot_location": {"x": 0, "y": 0, "z": 0}}
