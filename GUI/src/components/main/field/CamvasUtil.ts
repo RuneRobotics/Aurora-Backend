@@ -207,7 +207,7 @@ export function draw(
     {
       x: localization.x,
       y: localization.y,
-      rotation: localization.yaw,
+      rotation: (localization.yaw * Math.PI) / 180,
       width: 0.8,
       length: 0.8,
       color: Color.RED,
