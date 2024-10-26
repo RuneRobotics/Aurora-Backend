@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { selectedCamera } from "./CameraSlice";
 interface WatchingCamera {
   camera: selectedCamera;
@@ -51,211 +51,9 @@ export interface Data {
   pose: position;
 }
 const initialState: Data = {
-  notes: [
-    {
-      x: 1,
-      y: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-        {
-          camera: {
-            selectedCameraDeviceIP: "2",
-            selectedCameraIndex: 2,
-          },
-          certainty: 0.6,
-        },
-      ],
-    },
-    {
-      x: 1,
-      y: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-        {
-          camera: {
-            selectedCameraDeviceIP: "2",
-            selectedCameraIndex: 2,
-          },
-          certainty: 0.6,
-        },
-      ],
-    },
-    {
-      x: 1,
-      y: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-        {
-          camera: {
-            selectedCameraDeviceIP: "2",
-            selectedCameraIndex: 2,
-          },
-          certainty: 0.6,
-        },
-      ],
-    },
-    {
-      x: 1,
-      y: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-        {
-          camera: {
-            selectedCameraDeviceIP: "2",
-            selectedCameraIndex: 2,
-          },
-          certainty: 0.6,
-        },
-      ],
-    },
-    {
-      x: 1,
-      y: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-        {
-          camera: {
-            selectedCameraDeviceIP: "2",
-            selectedCameraIndex: 2,
-          },
-          certainty: 0.6,
-        },
-      ],
-    },
-    {
-      x: 3,
-      y: 4,
-      cameras: [],
-    },
-    {
-      x: 5,
-      y: 6,
-      cameras: [],
-    },
-    {
-      x: 4,
-      y: 3,
-      cameras: [],
-    },
-  ],
-  robots: [
-    {
-      x: 1,
-      y: 1,
-      rotation: 0,
-      width: 0.7,
-      length: 0.8,
-      color: Color.RED,
-      team: 0,
-      cameras: [],
-    },
-    {
-      x: 2,
-      y: 2,
-      rotation: 0,
-      width: 1,
-      length: 0.5,
-      color: Color.BLUE,
-      team: 5990,
-      cameras: [],
-    },
-    {
-      x: 4,
-      y: 4,
-      rotation: 0,
-      width: 0.8,
-      length: 0.8,
-      color: Color.RED,
-      team: 0,
-      cameras: [],
-    },
-  ],
-  aprilTags: [
-    {
-      id: 0,
-      x: 4,
-      y: 4,
-      z: 0,
-      roll: 0,
-      pitch: 0,
-      yaw: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-      ],
-    },
-    {
-      id: 0,
-      x: 3,
-      y: 3,
-      z: 0,
-      roll: 0,
-      pitch: 0,
-      yaw: 2,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-      ],
-    },
-    {
-      id: 0,
-      x: 12,
-      y: 2,
-      z: 0,
-      roll: 0,
-      pitch: 0,
-      yaw: 0,
-      cameras: [
-        {
-          camera: {
-            selectedCameraDeviceIP: "0",
-            selectedCameraIndex: 0,
-          },
-          certainty: 0.9,
-        },
-      ],
-    },
-  ],
+  notes: [],
+  robots: [],
+  aprilTags: [],
   pose: {
     x: 10,
     y: 3,
@@ -272,8 +70,15 @@ const initialState: Data = {
 const dataSlice = createSlice({
   name: "data",
   initialState,
-  reducers: {},
+  reducers: {
+    setPosition: (state, action: PayloadAction<position>) => {
+      state.pose = action.payload;
+    },
+    setTags: (state, action: PayloadAction<AprilTag[]>) => {
+      state.aprilTags = action.payload;
+    },
+  },
 });
 
-export const {} = dataSlice.actions;
+export const { setPosition, setTags } = dataSlice.actions;
 export default dataSlice.reducer;
