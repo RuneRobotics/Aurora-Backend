@@ -6,6 +6,7 @@ import {
   Robot,
 } from "../../../state/slices/DataSlice";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "./consants";
+import { getTagPose } from "../../../assets/util/AprilTag";
 
 function drawNote(
   note: Note,
@@ -40,11 +41,8 @@ const drawAprilTag = (
   const width = 0.4;
   const length = 0.07;
   const radius = Math.sqrt(width ** 2 + length ** 2) / 2;
-  const getPosition = (id: number) => {
-    //THIS IS NOT THE CORRECT IMPLEMENTATION. it is only temporery
-    return { x: tag.x, y: tag.y, rotation: tag.yaw };
-  };
-  const position = getPosition(tag.id);
+  const position = getTagPose(tag.id);
+  if (position === null) return;
   const drawRectangle = (
     x: number,
     y: number,

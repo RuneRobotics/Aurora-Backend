@@ -35,7 +35,7 @@ const AprilTagTable: React.FC<selectedCamera> = (camera: selectedCamera) => {
   const allTags: AprilTag[] = useSelector(
     (state: State) => state.data.aprilTags
   );
-  const aprilTags: CammeraAprilTag[] = [];
+  /*const aprilTags: CammeraAprilTag[] = [];
   allTags.forEach((tag) => {
     let flag = false;
     tag.cameras.forEach((tagCamera, index) => {
@@ -52,7 +52,7 @@ const AprilTagTable: React.FC<selectedCamera> = (camera: selectedCamera) => {
         flag = true;
       }
     });
-  });
+  });*/
   return (
     <Accordion>
       <AccordionSummary
@@ -83,7 +83,8 @@ const AprilTagTable: React.FC<selectedCamera> = (camera: selectedCamera) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {aprilTags.map((tag, index) => (
+              {/*
+              aprilTags.map((tag, index) => (
                 <TableRow
                   key={tag.id}
                   sx={{
@@ -99,7 +100,7 @@ const AprilTagTable: React.FC<selectedCamera> = (camera: selectedCamera) => {
                   <TableCell>{tag.yaw}</TableCell>
                   <TableCell>{tag.certainty}</TableCell>
                 </TableRow>
-              ))}
+              ))*/}
             </TableBody>
           </Table>
         </TableContainer>

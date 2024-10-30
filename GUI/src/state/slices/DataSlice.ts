@@ -25,13 +25,12 @@ export interface Robot {
 }
 export interface AprilTag {
   id: number;
-  x: number;
+  /*x: number;
   y: number;
   z: number;
   roll: number;
   pitch: number;
-  yaw: number;
-  cameras: WatchingCamera[];
+  yaw: number;*/
 }
 export interface position {
   length: number;
