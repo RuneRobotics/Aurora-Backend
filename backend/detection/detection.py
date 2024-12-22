@@ -1,59 +1,63 @@
-from apriltag_detection.apriltag_detection import detect_ats
-from object_detection.object_detection import ObjectDetector, detect_objects
-import os
 import cv2
+import os
 import json
-import pyapriltags as apriltag
 import logging
+import pyapriltags as apriltag
+from concurrent.futures import ThreadPoolExecutor
+from apriltag_detection.apriltag_detection import detect_apriltags
 from camera import Camera, Pose3D
 
-logging.getLogger("ultralytics").setLevel(logging.WARNING)
 
 def load_json(path: str):
     with open(path, 'r') as file:
         data = json.load(file)
     return data
 
+
 def open_stream(input_source):
-    if isinstance(input_source, int):  # Camera port
-        cap = cv2.VideoCapture(input_source)
-    elif os.path.exists(input_source):  # Local video file
-        cap = cv2.VideoCapture(input_source)
-    else:
-        print("Error: Invalid input source. Must be a camera port (int) or a valid video file path.")
-        exit()
-
+    cap = cv2.VideoCapture(input_source)
     if not cap.isOpened():
-        print("Error: Could not open the input source.")
-        exit()
-
+        print(f"Error: Could not open the input source {input_source}.")
+        return None
     return cap
+
 
 def save_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def detection_process(input_source, output_file_path: str):
-    object_detector = ObjectDetector(os.path.join(os.path.dirname(__file__), '..', 'data', 'yolo_weights', 'model.pt'), camera=camera, valid_ids=[3], conf_limit=0.6)
-    cap = open_stream(input_source)  # Can be a video file path or camera port
-    output_file = output_file_path
+
+def detection_process(input_source, output_file_path: str, camera: Camera):
+    cap = open_stream(input_source)
+    if cap is None:
+        return
 
     field_data = load_json(os.path.join(os.path.dirname(__file__), '..', 'data', 'apriltag_data', 'apriltags_layout.json'))
     at_detector = apriltag.Detector(families='tag36h11')
 
     while True:
         ret, frame = cap.read()
-
         if not ret:
-            print("Error: Failed to capture image from input source.")
+            print(f"Error: Failed to capture image from camera {camera.id}.")
             break
 
-        at_detection_data = detect_ats(frame=frame, detector=at_detector, field_data=field_data, camera=camera)
-        object_detection_data, output_frame = detect_objects(camera, object_detector=object_detector, frame=frame)
-        
-        cv2.imshow('YOLOv8 Detection', output_frame)
+        camera_position, detected_apriltags = detect_apriltags(frame=frame, detector=at_detector, field_data=field_data, camera=camera)
+        cv2.imshow(f'Camera {camera.id} Detection', frame)
 
-        save_data(output_file, object_detection_data | at_detection_data)
+
+        try:
+            robot_position = {"x": camera_position["x"],
+                            "y": camera_position["y"],
+                            "yaw": camera_position["yaw"]}
+        except Exception as e:
+            robot_position = "unkown"
+
+        fused = {"targets": {"notes": [],
+                             "robots": [],
+                             "apriltags": detected_apriltags},
+                 "robot_position": robot_position}
+        
+        save_data(output_file_path, {"cameras": [], "robot_data": fused})
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -61,20 +65,34 @@ def detection_process(input_source, output_file_path: str):
     cap.release()
     cv2.destroyAllWindows()
 
+
+def open_all_cameras_and_process(output_file_path: str, camera_positions):
+    max_cameras = 2
+    input_sources = []
+    camera_list = []
+
+    for i in range(max_cameras):
+        cap = open_stream(i)
+        if cap:
+            input_sources.append(i)
+            # Create camera metadata
+            pose = camera_positions[i]  # You can set specific pose data here
+            camera = Camera(id=i, position=pose)  # You can add more metadata to the Camera class as needed
+            camera_list.append(camera)
+            cap.release()  # Immediately release as we just check availability
+
+    # Start detection process in parallel for each camera
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        for camera in camera_list:
+            futures.append(executor.submit(detection_process, camera.id, output_file_path, camera))
+
+        # Wait for all processes to finish
+        for future in futures:
+            future.result()  # This will raise exceptions if any occurred
+
+
 if __name__ == '__main__':
-    input_type = input("Enter 'video' to use a video file or 'camera' to use webcam: ").strip().lower()
-
-    if input_type == 'video':
-        video_path = input("Enter the path to the video file: ").strip()
-        input_source = os.path.join(os.path.dirname(__file__), '..', 'downloads', 'video1080p.mp4')
-    elif input_type == 'camera':
-        input_source = 0  # Default webcam port
-    else:
-        print("Invalid input. Exiting.")
-        exit()
-
-    pose = Pose3D()
-    camera = Camera(port=input_source if isinstance(input_source, int) else 0, position=pose)  # Camera object needs port even if input is video
     output_file_path = os.path.join(os.path.dirname(__file__), '..', 'output', 'output.json')
-
-    detection_process(input_source=input_source, output_file_path=output_file_path)
+    camera_positions = [Pose3D(), Pose3D()]
+    open_all_cameras_and_process(output_file_path, camera_positions=camera_positions)
