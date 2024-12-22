@@ -55,9 +55,9 @@ def detection_process(input_source, output_file_path: str, camera: Camera):
         fused = {"targets": {"notes": [],
                              "robots": [],
                              "apriltags": detected_apriltags},
-                 "robot_position": robot_position}
+                 "position": robot_position}
         
-        save_data(output_file_path, {"cameras": [], "robot_data": fused})
+        save_data(output_file_path, {"devices": [], "fused_data": fused})
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -67,7 +67,7 @@ def detection_process(input_source, output_file_path: str, camera: Camera):
 
 
 def open_all_cameras_and_process(output_file_path: str, camera_positions):
-    max_cameras = 2
+    max_cameras = 1
     input_sources = []
     camera_list = []
 
