@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { draw } from "./CamvasUtil";
+import { draw } from "./CanvasUtil";
 import backgroundImageSrc from "../../assets/image.png";
 import FieldContainer from "./Container";
 import { aspectRatio as ASPECT_RATIO } from "./consants";

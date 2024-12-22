@@ -1,3 +1,4 @@
+import { Pi } from "lucide-react";
 import { AprilTag, Note, Pose2d, Robot } from "../../types";
 import { getTagPose } from "../../utils/AprilTag";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "./consants";
