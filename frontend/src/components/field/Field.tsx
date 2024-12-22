@@ -107,7 +107,6 @@ const Field: React.FC = () => {
       ? data.data?.fused_data.position
       : { x: 0, y: 0, yaw: 0 },
   ]);
-  console.log("rendered");
   return (
     <FieldContainer>
       <canvas ref={canvasRef} />

@@ -32,7 +32,6 @@ function getAttributes(targetType: TargetType) {
 const DataPanel: React.FC<Props> = ({ mode, camera }: Props) => {
   const [targetType, setTargetType] = useState<TargetType>("apriltags");
   const data = camera.notes;
-  console.log(data);
   if (mode === "data")
     return (
       <Stack>
