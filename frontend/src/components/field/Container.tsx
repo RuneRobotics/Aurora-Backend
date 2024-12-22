@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { styled } from "@mui/system";
 
 const FieldContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: "black",
+  backgroundColor: "rgb(12,21,36)",
   borderRadius: theme.shape.borderRadius,
   margin: 0,
   padding: 0,
