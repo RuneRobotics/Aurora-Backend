@@ -37,13 +37,24 @@ def get_camera_pose(tag_world_corners, tag_image_corners, camera_matrix, dist_co
         return np.array([roll, pitch, yaw])
 
     euler_angles = rotation_matrix_to_euler_angles(rotation_matrix_inv)
+    tag_euler_angles = rotation_matrix_to_euler_angles(rotation_matrix)
     
     camera_position = camera_position.flatten()
     euler_angles = np.degrees(euler_angles)
+    tag_euler_angles = np.degrees(tag_euler_angles)
 
-    return camera_position, euler_angles
+    return camera_position, euler_angles, tvec.flatten(), tag_euler_angles
 
-def compute_tag_world_corners(tag_x_world, tag_y_world, tag_z_world, tag_theta_world, tag_half_size):
+
+def calculate_tag_world_corners(tag_pose):
+
+    # MOVE TO A DIFFERENT FILE AND DO THAT ELSEWHERE
+    tag_half_size = 0.5 * ((6.5 * 2.54) / 100)  # Convert from inches to meters
+
+    tag_x_world = tag_pose["translation"]["x"]
+    tag_y_world = tag_pose["translation"]["y"]
+    tag_z_world = tag_pose["translation"]["z"]
+    tag_theta_world = 2 * math.acos(tag_pose["rotation"]["quaternion"]["W"])
 
     cos = np.cos(np.pi - tag_theta_world)
     sin = np.sin(np.pi - tag_theta_world)
@@ -70,20 +81,70 @@ def compute_tag_world_corners(tag_x_world, tag_y_world, tag_z_world, tag_theta_w
 
     return np.array(tag_world_corners, dtype=np.float32)
 
-def detect_ats(frame, detector, field_data, camera: Camera):
+
+def calculate_tag_data(tag_position, tag_euler_angles, tag_id, tag_score):
+
+    position = {"x": tag_position[0],
+                "y": tag_position[1],
+                "z": tag_position[2],
+                "roll": tag_euler_angles[0],
+                "pitch": tag_euler_angles[1],
+                "yaw": tag_euler_angles[2]}
+
+    return {"position": position, "certainty": tag_score, "id": tag_id}
+
+
+def calculate_camera_position(camera_positions):
+
+    total_scores = sum(position[2] for position in camera_positions)
+    
+    if total_scores == 0:
+        return {}
+
+    weighted_camera_position = [0, 0, 0]
+    weighted_euler_angles = [0, 0, 0]
+    
+    for position in camera_positions:
+        camera_position, euler_angles, score = position
+        weight = score / total_scores
+        
+        camera_x_world, camera_y_world, camera_z_world = camera_position
+        camera_roll_world, camera_pitch_world, camera_yaw_world = euler_angles
+
+        weighted_camera_position[0] += camera_x_world * weight
+        weighted_camera_position[1] += camera_y_world * weight
+        weighted_camera_position[2] += camera_z_world * weight
+        
+        weighted_euler_angles[0] += camera_roll_world * weight
+        weighted_euler_angles[1] += camera_pitch_world * weight
+        weighted_euler_angles[2] += camera_yaw_world * weight
+
+    return {
+            "x": weighted_camera_position[0],
+            "y": weighted_camera_position[1],
+            "z": weighted_camera_position[2],
+            "roll": weighted_euler_angles[0],
+            "pitch": weighted_euler_angles[1],
+            "yaw": weighted_euler_angles[2]
+            }
+
+
+def detect_apriltags(detector, field_data, camera: Camera, frame):
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    detections = detector.detect(gray_frame)
-
     camera_matrix = camera.matrix
     dist_coeffs = camera.dist_coeffs
-    
-    tag_half_size = 0.5 * ((6.5 * 2.54) / 100)  # Convert from inches to meters
-
-    detected_atags = []
+    detected_apriltags = []
+    camera_positions = []
     pose = {}
 
+    detections = detector.detect(gray_frame)
+
+    if len(detections) == 0:
+        return {}, {}
+
     for detection in detections:
+
         tag_id = detection.tag_id
 
         try:
@@ -92,45 +153,25 @@ def detect_ats(frame, detector, field_data, camera: Camera):
             logging.error(f"Error: tag_id {tag_id} is out of bounds.")
             continue
 
-        tag_x_world = tag_pose["translation"]["x"]
-        tag_y_world = tag_pose["translation"]["y"]
-        tag_z_world = tag_pose["translation"]["z"]
-        tag_theta_world = 2 * math.acos(tag_pose["rotation"]["quaternion"]["W"])
-
         tag_image_corners = np.array(detection.corners, dtype=np.float32)
-
-        tag_world_corners = compute_tag_world_corners(tag_x_world, tag_y_world, tag_z_world, tag_theta_world, tag_half_size)
+        tag_world_corners = calculate_tag_world_corners(tag_pose)
 
         try:
-            camera_position, euler_angles = get_camera_pose(tag_world_corners, tag_image_corners, camera_matrix, dist_coeffs)
+            camera_position, euler_angles, tag_position, tag_euler_angles = get_camera_pose(tag_world_corners, 
+                                                                                            tag_image_corners, 
+                                                                                            camera_matrix, 
+                                                                                            dist_coeffs)
         except Exception as e:
-            logging.error(f"Error: {e}. An exception occurred while attempting to solve PnP.")
+            logging.error(f"Error: {e}. An exception occurred while attempting to use solve PnP.")
             continue
-
-        camera_x_world, camera_y_world, camera_z_world = camera_position
-        camera_roll_world, camera_pitch_world, camera_yaw_world = euler_angles
 
         corners_int = np.array(detection.corners, dtype=np.int32)
         cv2.polylines(frame, [corners_int.reshape((-1, 1, 2))], isClosed=True, color=(255, 110, 200), thickness=6)
 
-        detected_atags.append({
-            "id": tag_id, 
-            # need to add here robot position calculation
-            "camera_position": {"x": camera_x_world, 
-                                "y": camera_y_world, 
-                                "z": camera_z_world, 
-                                "roll": camera_roll_world, 
-                                "pitch": camera_pitch_world, 
-                                "yaw": camera_yaw_world},
-            "distances_from_camera": {"x": (dist_x := abs(camera_x_world - tag_x_world)), 
-                                      "y": (dist_y := abs(camera_y_world - tag_y_world)), 
-                                      "z": (dist_z := abs(camera_z_world - tag_z_world))},
-            "score": detection.decision_margin / 100,
-            "total_distance": np.sqrt(dist_x**2 + dist_y**2 + dist_z**2)
-        })
+        tag_data = calculate_tag_data(tag_position, tag_euler_angles, tag_id, 1) # 1 should be replaced with the tag certainty
+        detected_apriltags.append(tag_data)
+        camera_positions.append((camera_position, euler_angles, 1)) # 1 should be replaced with the tag certainty
 
-        fake_data = {"length": 0.6, "width": 0.6, "cameras": []}
-        if len(detected_atags) > 0:
-            pose = detected_atags[0]["camera_position"] | fake_data
+    camera_position = calculate_camera_position(camera_positions)
 
-    return {"pose": pose, "aprilTags": []} |  {"aprilTags": detected_atags, "robot_location": {"x": 0, "y": 0, "z": 0}}
+    return camera_position, detected_apriltags
