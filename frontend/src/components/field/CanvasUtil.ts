@@ -45,6 +45,7 @@ const drawAprilTag = (
     color: string,
     radius: number
   ) => {
+    console.log("rotation is ");
     const angleToCorner = Math.atan(width / length);
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -201,7 +202,7 @@ export function draw(
       position: {
         x: localization.x,
         y: localization.y,
-        yaw: localization.yaw,
+        yaw: (Math.PI * localization.yaw) / 180,
       },
       certainty: 0,
     },
