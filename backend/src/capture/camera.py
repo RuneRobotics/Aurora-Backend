@@ -13,7 +13,7 @@ class Pose3D:
 class Camera:
     def __init__(self,
                  id, 
-                 position: Pose3D, 
+                 position: Pose3D=Pose3D(), 
                  matrix = np.array([[600, 0, 320],  # fx, 0, cx
                                     [0, 600, 240],  # 0, fy, cy
                                     [0, 0, 1]], dtype=np.float32),

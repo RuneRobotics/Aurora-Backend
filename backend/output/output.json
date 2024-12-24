@@ -4,7 +4,7 @@
         "targets": {
             "notes": [],
             "robots": [],
-            "apriltags": {}
+            "apriltags": "unkown"
         },
         "position": "unkown"
     }
