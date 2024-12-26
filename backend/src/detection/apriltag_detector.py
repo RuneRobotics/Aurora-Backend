@@ -1,4 +1,4 @@
-from capture.camera import Camera
+from capture.camera import Camera, Pose3D
 from utils.json_utils import load_field
 from utils import constants
 import pyapriltags as apriltag
@@ -13,6 +13,7 @@ class AprilTagDetector:
     def __init__(self, season: str, camera: Camera, families: str='tag36h11'):
 
         self.__detector = apriltag.Detector(families=families)
+        self.camera = camera
         self.camera_matrix = camera.matrix
         self.dist_coeffs = camera.dist_coeffs
         self.field_data = load_field(season)
@@ -48,7 +49,7 @@ class AprilTagDetector:
             tag_world_corners = self.__get_tag_world_corners(tag_pose)
 
             try:
-                camera_position, euler_angles, tag_position, tag_euler_angles = self.__get_camera_pose(tag_world_corners, tag_image_corners,)
+                camera_position, euler_angles = self.__get_camera_pose(tag_world_corners, tag_image_corners,)
             except Exception as e:
                 logging.error(f"Error: {e}. An exception occurred while attempting to use solve PnP.")
                 continue
@@ -56,15 +57,14 @@ class AprilTagDetector:
             corners_int = np.array(tag.corners, dtype=np.int32)
             cv2.polylines(frame, [corners_int.reshape((-1, 1, 2))], isClosed=True, color=constants.PURPLE, thickness=6)
 
-            tag_data = self.__get_tag_pose(tag_position, tag_euler_angles, tag_id, 1) # 1 should be replaced with the tag certainty
-            detected_apriltags.append(tag_data)
+            detected_apriltags.append(tag_id)
             camera_poses.append((camera_position, euler_angles, 1)) # 1 should be replaced with the tag certainty
 
-
-
         camera_position = self.__get_weighted_camera_pose(camera_poses)
-
-        return camera_position, detected_apriltags
+        self.camera.deteceted_apriltags = detected_apriltags
+        self.camera.field_position = camera_position
+        robot_pose = self.camera.get_robot_pose()
+        self.camera.add_pose_to_queue(robot_pose)
     
     
     def __get_weighted_camera_pose(self, camera_positions):
@@ -92,14 +92,12 @@ class AprilTagDetector:
             weighted_euler_angles[1] += camera_pitch_world * weight
             weighted_euler_angles[2] += camera_yaw_world * weight
 
-        return {
-                "x": weighted_camera_position[0],
-                "y": weighted_camera_position[1],
-                "z": weighted_camera_position[2],
-                "roll": weighted_euler_angles[0],
-                "pitch": weighted_euler_angles[1],
-                "yaw": weighted_euler_angles[2]
-                }
+        return Pose3D(x=weighted_camera_position[0],
+                      y=weighted_camera_position[1],
+                      z=weighted_camera_position[2],
+                      roll=weighted_euler_angles[0],
+                      pitch=weighted_euler_angles[1],
+                      yaw=weighted_euler_angles[2])
 
 
     def __get_camera_pose(self, tag_world_corners, tag_image_corners):
@@ -123,24 +121,22 @@ class AprilTagDetector:
             singular = sy < 1e-6
 
             if not singular:
-                roll = np.arctan2(R[2, 1], R[2, 2])
-                pitch = np.arctan2(-R[2, 0], sy)
-                yaw = np.arctan2(R[1, 0], R[0, 0])
+                A = np.arctan2(R[2, 1], R[2, 2])
+                B = np.arctan2(-R[2, 0], sy)
+                C = np.arctan2(R[1, 0], R[0, 0])
             else:
-                roll = np.arctan2(-R[1, 2], R[1, 1])
-                pitch = np.arctan2(-R[2, 0], sy)
-                yaw = 0
+                A = np.arctan2(-R[1, 2], R[1, 1])
+                B = np.arctan2(-R[2, 0], sy)
+                C = 0
 
-            return np.array([roll, pitch, yaw])
+            return np.array([A, B, C])
 
         euler_angles = rotation_matrix_to_euler_angles(rotation_matrix_inv)
-        tag_euler_angles = rotation_matrix_to_euler_angles(rotation_matrix)
         
         camera_position = camera_position.flatten()
         euler_angles = np.degrees(euler_angles)
-        tag_euler_angles = np.degrees(tag_euler_angles)
 
-        return camera_position, euler_angles, tvec.flatten(), tag_euler_angles
+        return camera_position, euler_angles
 
 
     def __get_tag_world_corners(self, tag_pose):

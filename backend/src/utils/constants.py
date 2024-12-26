@@ -6,3 +6,8 @@ REEFSCAPE = 2025
 UNKOWN = 'unkown'
 TAB = 4
 PURPLE = (255, 110, 200)
+
+# metrics
+QUEUE_SIZE = 10
+TAG_HALF_SIZE = 0.5 * ((6.5 * 2.54) / 100)
+UPDATE_INTERVAL = 0.02

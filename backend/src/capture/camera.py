@@ -1,5 +1,6 @@
 import numpy as np
-import cv2
+from queue import Queue
+from utils import constants
 
 class Pose3D:
     def __init__(self, x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
@@ -12,35 +13,28 @@ class Pose3D:
 
 class Camera:
     def __init__(self,
-                 id, 
-                 position: Pose3D=Pose3D(), 
+                 id,
+                 position_on_robot: Pose3D=Pose3D(), 
                  matrix = np.array([[600, 0, 320],  # fx, 0, cx
                                     [0, 600, 240],  # 0, fy, cy
                                     [0, 0, 1]], dtype=np.float32),
                 dist_coeffs = np.zeros((4, 1))):
         
+        self.robot_pose_queue = Queue(maxsize=constants.QUEUE_SIZE)
+        self.deteceted_apriltags = []
         self.id = id
-        self.position = position
+        self.position_on_robot = position_on_robot
+        self.field_position = Pose3D()
         self.matrix = matrix
         self.dist_coeffs = dist_coeffs
 
-    def undistort_image_point(self, image_point):
+    def get_robot_pose(self):
+        # NEEDS TO BE IMPLEMENTED
+        return self.field_position
 
-        image_points = np.array([[image_point]], dtype='float32')  # Shape (1, 1, 2)
+    def add_pose_to_queue(self, pose):
 
-        undistorted_points = cv2.undistortPoints(image_points, self.matrix, self.dist_coeffs)
+        if self.robot_pose_queue.full():
+            _ = self.robot_pose_queue.get()
         
-        return undistorted_points[0][0]  # Return the undistorted point
-
-def distance_to_camera(camera: Camera, bbox, object_width):
-
-    camera_matrix = camera.matrix
-
-    xmin, ymin, xmax, ymax = bbox
-    object_width_pixel = xmax - xmin
-
-    focal_length = camera_matrix[0, 0]
-
-    distance = (focal_length * object_width) / object_width_pixel
-
-    return distance
+        self.robot_pose_queue.put(pose)
