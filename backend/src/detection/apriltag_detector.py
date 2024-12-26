@@ -121,15 +121,15 @@ class AprilTagDetector:
             singular = sy < 1e-6
 
             if not singular:
-                A = np.arctan2(R[2, 1], R[2, 2])
-                B = np.arctan2(-R[2, 0], sy)
-                C = np.arctan2(R[1, 0], R[0, 0])
+                theta = -np.arctan2(R[2, 1], R[2, 2])
+                psi = np.arctan2(-R[2, 0], sy)
+                phi = np.arctan2(R[1, 0], R[0, 0]) + np.pi/2
             else:
-                A = np.arctan2(-R[1, 2], R[1, 1])
-                B = np.arctan2(-R[2, 0], sy)
-                C = 0
+                theta = np.arctan2(-R[1, 2], R[1, 1])
+                psi = np.arctan2(-R[2, 0], sy)
+                phi = 0
 
-            return np.array([A, B, C])
+            return np.array([psi, theta, phi])
 
         euler_angles = rotation_matrix_to_euler_angles(rotation_matrix_inv)
         
