@@ -15,8 +15,12 @@ def detection_process(camera: Camera, season: int):
     cap = open_stream(camera.id)
     if cap is None:
         return
-
+    
+    print(f"created detector for camera {camera.id}")
     apriltag_detector = AprilTagDetector(camera=camera, families='tag36h11', season=season)
+
+    
+    print(f"starting loop for camera {camera.id}")
 
     while True:
         ret, frame = cap.read()
@@ -36,5 +40,6 @@ def detection_process(camera: Camera, season: int):
 
 if __name__ == '__main__':
     output_file_path = Path(__file__).parent / Path("../output/output.json")
-    camera_list = [Camera(id=0)]#, Camera(id=1)] # should be replaced with loading the cameras from the config file also not fail when not detecting all camreas correctly
+    #camera_list = [Camera(id=0)]
+    camera_list = [Camera(id=0), Camera(id=1)] # should be replaced with loading the cameras from the config file also not fail when not detecting all camreas correctly
     open_all_cameras_and_process(detection_process, camera_list, constants.CRESCENDO ,output_file_path)

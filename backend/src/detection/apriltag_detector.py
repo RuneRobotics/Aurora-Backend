@@ -27,12 +27,18 @@ class AprilTagDetector:
 
     def get_camera_and_tags_data(self, frame):
 
+
+        cameraone = False
+        if self.camera.id == 1:
+            cameraone = True
+
         detected_apriltags = []
         camera_poses = []
         
         detections = self.__detect(frame=frame)
 
         if len(detections) == 0:
+            if cameraone: print("no detections!####################################3")
             return constants.UNKOWN, constants.UNKOWN
 
         for tag in detections:

@@ -7,7 +7,7 @@ def data_format(cameras: list, targets_dict, robot_position):
             "fused_data": fused_format(targets_dict, robot_position)}
 
 
-def camera_dict_format(camera: Camera):
+def camera_format(camera: Camera):
 
     return {"camera_id": camera.id,
             "targets": {"april_tags": camera.deteceted_apriltags},
@@ -33,4 +33,3 @@ def pose3d_format(pose: Pose3D):
     except:
 
         return constants.UNKOWN
-
