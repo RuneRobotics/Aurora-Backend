@@ -18,7 +18,7 @@ class AprilTagDetector:
         self.dist_coeffs = camera.dist_coeffs
         self.field_data = load_field(season)
 
-    
+
     def __detect(self, frame):
         
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -55,7 +55,11 @@ class AprilTagDetector:
                 continue
 
             corners_int = np.array(tag.corners, dtype=np.int32)
-            cv2.polylines(frame, [corners_int.reshape((-1, 1, 2))], isClosed=True, color=constants.PURPLE, thickness=6)
+            self.camera.frame = cv2.polylines(frame, 
+                                              [corners_int.reshape((-1, 1, 2))], 
+                                              isClosed=True, 
+                                              color=constants.PURPLE, 
+                                              thickness=6)
 
             detected_apriltags.append(tag_id)
             camera_poses.append((camera_position, euler_angles, 1)) # 1 should be replaced with the tag certainty

@@ -24,9 +24,10 @@ class Camera:
         self.deteceted_apriltags = []
         self.id = id
         self.position_on_robot = position_on_robot
-        self.field_position = Pose3D()
+        self.field_position = None
         self.matrix = matrix
         self.dist_coeffs = dist_coeffs
+        self.frame = None
 
     def get_robot_pose(self):
         # NEEDS TO BE IMPLEMENTED
