@@ -3,7 +3,7 @@ from utils import constants
 
 def data_format(cameras: list, targets_dict, robot_position):
 
-    return {"cameras": [camera_dict_format(camera) for camera in cameras],
+    return {"cameras": [camera_format(camera) for camera in cameras],
             "fused_data": fused_format(targets_dict, robot_position)}
 
 

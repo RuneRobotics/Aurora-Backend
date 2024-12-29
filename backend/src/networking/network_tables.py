@@ -14,3 +14,4 @@ It should update the camera streams on the network (camera.frame is already cons
 def update_streams(cameras: list):
     # TODO: @NoamHSU
     raise NotImplementedError("This function has not been implemented yet.")
+    
