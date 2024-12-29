@@ -9,6 +9,7 @@ from utils import constants
 from utils.json_utils import json_to_dict, dict_to_json
 from detection.apriltag_detector import AprilTagDetector
 from capture.camera_manager import open_stream, open_all_cameras_and_process
+from networking.server import run_server
 
 def detection_process(camera: Camera, season: int):
     
@@ -39,7 +40,8 @@ def detection_process(camera: Camera, season: int):
 
 
 if __name__ == '__main__':
-    output_file_path = Path(__file__).parent / Path("../output/output.json")
+    run_server()
+    #output_file_path = Path(__file__).parent / Path("../output/output.json")
     #camera_list = [Camera(id=0)]
-    camera_list = [Camera(id=0), Camera(id=1)] # should be replaced with loading the cameras from the config file also not fail when not detecting all camreas correctly
-    open_all_cameras_and_process(detection_process, camera_list, constants.CRESCENDO ,output_file_path)
+    #camera_list = [Camera(id=0), Camera(id=1)] # should be replaced with loading the cameras from the config file also not fail when not detecting all camreas correctly
+    #open_all_cameras_and_process(detection_process, camera_list, constants.CRESCENDO ,output_file_path)
