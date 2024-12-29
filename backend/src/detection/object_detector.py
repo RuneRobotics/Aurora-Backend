@@ -1,1 +1,3 @@
-# TODO: implement object detection with yolo
+class ObjectDetector:
+    def __init__(self):
+        pass
