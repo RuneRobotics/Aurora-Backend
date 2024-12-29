@@ -9,7 +9,6 @@ from utils import constants
 from utils.json_utils import json_to_dict, dict_to_json
 from detection.apriltag_detector import AprilTagDetector
 from capture.camera_manager import open_stream, open_all_cameras_and_process
-from networking.server import run_server
 
 def detection_process(camera: Camera, season: int):
     
@@ -40,8 +39,10 @@ def detection_process(camera: Camera, season: int):
 
 
 if __name__ == '__main__':
-    run_server()
-    #output_file_path = Path(__file__).parent / Path("../output/output.json")
-    #camera_list = [Camera(id=0)]
+    #run_server()
+    output_file_path = Path(__file__).parent / Path("../output/output.json")
+    camera_list = [Camera(id=0)]
+    #output = {}
+    #output={'cameras': [{'camera_id': 0, 'targets': {'april_tags': [5]}, 'camera_position': {'x': 14.577968305374135, 'y': 7.91970124399963, 'z': 1.3169825997986533, 'roll': -48.18389474963098, 'pitch': 74.24480061657265, 'yaw': 50.34954095481493}}], 'fused_data': {'targets': {'april_tags': []}, 'robot_position': {'x': 14.577968305374135, 'y': 7.91970124399963, 'z': 1.3169825997986533, 'roll': -48.18389474963098, 'pitch': 74.24480061657265, 'yaw': 50.34954095481493}}}
     #camera_list = [Camera(id=0), Camera(id=1)] # should be replaced with loading the cameras from the config file also not fail when not detecting all camreas correctly
-    #open_all_cameras_and_process(detection_process, camera_list, constants.CRESCENDO ,output_file_path)
+    open_all_cameras_and_process(detection_process, camera_list, constants.CRESCENDO ,output_file_path)
