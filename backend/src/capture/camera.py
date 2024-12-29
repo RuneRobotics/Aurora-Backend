@@ -33,32 +33,6 @@ class Camera:
         if self.field_position is None:
             return None
         
-        # Extract field position of the camera
-        cam_x = self.field_position.x
-        cam_y = self.field_position.y
-        cam_z = self.field_position.z
-        cam_roll = self.field_position.roll
-        cam_pitch = self.field_position.pitch
-        cam_yaw = self.field_position.yaw
-
-        # Extract the camera's position on the robot
-        robot_rel_x = self.position_on_robot.x
-        robot_rel_y = self.position_on_robot.y
-        robot_rel_z = self.position_on_robot.z
-        robot_rel_roll = self.position_on_robot.roll
-        robot_rel_pitch = self.position_on_robot.pitch
-        robot_rel_yaw = self.position_on_robot.yaw
-
-        robot_x = cam_x - robot_rel_x
-        robot_y = cam_y - robot_rel_y
-        robot_z = cam_z - robot_rel_z
-        robot_roll = cam_roll - robot_rel_roll
-        robot_pitch = cam_pitch - robot_rel_pitch
-        robot_yaw = cam_yaw - robot_rel_yaw
-
-        # Return the calculated robot position as a Pose3D object
-        return Pose3D(robot_x, robot_y, robot_z, robot_roll, robot_pitch, robot_yaw)
-
         # NEEDS TO BE IMPLEMENTED
         # this return value is just for now
         return self.field_position

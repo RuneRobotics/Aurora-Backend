@@ -27,18 +27,12 @@ class AprilTagDetector:
 
     def get_camera_and_tags_data(self, frame):
 
-
-        cameraone = False
-        if self.camera.id == 1:
-            cameraone = True
-
         detected_apriltags = []
         camera_poses = []
         
         detections = self.__detect(frame=frame)
 
         if len(detections) == 0:
-            if cameraone: print("no detections!####################################3")
             return constants.UNKOWN, constants.UNKOWN
 
         for tag in detections:
@@ -61,15 +55,16 @@ class AprilTagDetector:
                 continue
 
             corners_int = np.array(tag.corners, dtype=np.int32)
-            self.camera.frame = cv2.polylines(frame, 
-                                              [corners_int.reshape((-1, 1, 2))], 
-                                              isClosed=True, 
-                                              color=constants.PURPLE, 
-                                              thickness=6)
+            frame = cv2.polylines(frame, 
+                                  [corners_int.reshape((-1, 1, 2))], 
+                                  isClosed=True, 
+                                  color=constants.PURPLE,
+                                  thickness=6)
 
             detected_apriltags.append(tag_id)
             camera_poses.append((camera_position, euler_angles, 1)) # 1 should be replaced with the tag certainty
 
+        self.camera.frame = frame
         camera_position = self.__get_weighted_camera_pose(camera_poses)
         self.camera.deteceted_apriltags = detected_apriltags
         self.camera.field_position = camera_position
