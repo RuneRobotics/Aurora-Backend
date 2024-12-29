@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { setData } from '../store/dataSlice';
-import { Data } from '../types';
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setData } from "../store/dataSlice";
+import { Data } from "../types";
 
 const FETCH_INTERVAL = 100; // 100ms interval for real-time updates
 
@@ -11,14 +11,14 @@ export const useDataFetching = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/data');
+        const response = await fetch("/data");
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         const data: Data = await response.json();
         dispatch(setData(data));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 

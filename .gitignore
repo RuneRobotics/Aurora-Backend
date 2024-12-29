@@ -15,7 +15,6 @@ env.bak/
 venv.bak/
 *.egg-info/
 *.egg
-dist/
 build/
 *.pyc
 
@@ -104,7 +103,6 @@ venv.bak/
 test-results/
 
 # Webpack
-dist/
 .terraform/
 
 # Downloads

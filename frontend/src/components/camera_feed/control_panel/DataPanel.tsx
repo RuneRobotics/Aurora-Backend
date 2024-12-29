@@ -9,10 +9,8 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from "@mui/material";
 import { CameraData, Mode, targets, TargetType } from "../../../types";
-import { formatCameraData } from "../../../utils/formatters";
 import { useState } from "react";
 interface Props {
   mode: Mode;

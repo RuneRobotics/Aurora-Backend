@@ -9,7 +9,6 @@ import Sidebar from "./SideBar";
 import ResizeHandle from "./ResizeHandler";
 import CameraFeed from "./camera_feed/CameraFeed";
 import { useDataFetching } from "../hooks/useDataFetching";
-import Canvas from "./Canvas";
 import Field from "./field/Field";
 
 const Dashboard: React.FC = () => {

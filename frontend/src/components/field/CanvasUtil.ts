@@ -1,5 +1,4 @@
 import { AprilTag, Note, Pose2d, Robot } from "../../types";
-import { getTagPose } from "../../utils/AprilTag";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "./consants";
 const drawRotatedRectangle = (
   ctx: CanvasRenderingContext2D,
@@ -114,7 +113,7 @@ export function draw(
   ctx: CanvasRenderingContext2D,
   height: number,
   width: number,
-  aprilTags: AprilTag[],
+  _aprilTags: AprilTag[],
   robots: Robot[],
   notes: Note[],
   localization: Pose2d
