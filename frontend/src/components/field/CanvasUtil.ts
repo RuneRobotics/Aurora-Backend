@@ -1,8 +1,34 @@
-import { Pi } from "lucide-react";
 import { AprilTag, Note, Pose2d, Robot } from "../../types";
 import { getTagPose } from "../../utils/AprilTag";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "./consants";
+const drawRotatedRectangle = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  theta: number,
+  radius: number,
+  color: string
+) => {
+  // Save the current state of the canvas
+  ctx.save();
 
+  // Translate to the rectangle's center
+  ctx.translate(x, y);
+
+  // Rotate the canvas by the given angle (in radians)
+  ctx.rotate(-theta);
+
+  // Draw the rectangle centered at the origin (0, 0)
+  ctx.fillStyle = color; // Set fill color (optional)
+  ctx.beginPath();
+  ctx.roundRect(-width / 2, -height / 2, width, height, radius);
+  ctx.closePath();
+  ctx.fill();
+  // Restore the canvas to its original state
+  ctx.restore();
+};
 function drawNote(
   note: Note,
   ctx: CanvasRenderingContext2D,
@@ -26,151 +52,62 @@ function drawNote(
   ctx.closePath();
   ctx.fill();
 }
-const drawAprilTag = (
-  location: { x: number; y: number },
-  tag: AprilTag,
-  normalX: (xVal: number) => number,
-  normalY: (yVal: number) => number,
-  ctx: CanvasRenderingContext2D
-) => {
-  const width = 0.4;
-  const length = 0.07;
-  const radius = Math.sqrt(width ** 2 + length ** 2) / 2;
-  const position: Pose2d | null = getTagPose(tag.id);
-  if (position === null) return;
-  const drawRectangle = (
-    x: number,
-    y: number,
-    rotation: number,
-    color: string,
-    radius: number
-  ) => {
-    console.log("rotation is ");
-    const angleToCorner = Math.atan(width / length);
-    ctx.fillStyle = color;
-    ctx.beginPath();
-
-    const corners = [
-      -angleToCorner,
-      angleToCorner,
-      Math.PI - angleToCorner,
-      Math.PI + angleToCorner,
-    ].map((cornerAngle) => ({
-      x: normalX(x + Math.cos(cornerAngle + rotation) * radius),
-      y: normalY(y + Math.sin(cornerAngle + rotation) * radius),
-    }));
-
-    ctx.moveTo(corners[0].x, corners[0].y);
-    corners.forEach((corner) => ctx.lineTo(corner.x, corner.y));
-    ctx.closePath();
-    ctx.fill();
-  };
-  ctx.strokeStyle = "cyan";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(normalX(location.x), normalY(location.y));
-  ctx.lineTo(normalX(position.x), normalY(position.y));
-  ctx.stroke();
-  ctx.beginPath();
-  drawRectangle(position.x, position.y, position.yaw, "grey", radius);
-  drawRectangle(position.x, position.y, position.yaw, "black", radius * 0.7);
-};
 const drawRobot = (
   robot: Robot,
   normalX: (xVal: number) => number,
   normalY: (yVal: number) => number,
   ctx: CanvasRenderingContext2D
 ) => {
-  const drawRectangle = (
-    x: number,
-    y: number,
-    width: number,
-    length: number,
-    rotation: number,
-    color: string
-  ) => {
-    const radius = Math.sqrt(width ** 2 + length ** 2) / 2;
-    const angleToCorner = Math.atan(width / length);
-    ctx.fillStyle = color;
-    ctx.beginPath();
-
-    const corners = [
-      -angleToCorner,
-      angleToCorner,
-      Math.PI - angleToCorner,
-      Math.PI + angleToCorner,
-    ].map((cornerAngle) => ({
-      x: normalX(x + Math.cos(cornerAngle + rotation) * radius),
-      y: normalY(y + Math.sin(cornerAngle + rotation) * radius),
-    }));
-
-    ctx.moveTo(corners[0].x, corners[0].y);
-    corners.forEach((corner) => ctx.lineTo(corner.x, corner.y));
-    ctx.closePath();
-    ctx.fill();
-
-    // Set the text alignment and baseline
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = robot.alliance === "RED" ? "red" : "blue"; // Set the text color
-
-    // Calculate the available space in the inner rectangle
-    const availableWidth = Math.abs(
-      normalX(x + width / 2) - normalX(x - width / 2)
-    );
-    const availableHeight = Math.abs(
-      normalY(y + length / 2) - normalY(y - length / 2)
-    );
-
-    // Start with the initial font size (14px) and measure the text
-    let fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
-    let textWidth = ctx.measureText(`${robot.team}`).width;
-
-    // Reduce the font size if the text is too wide for the available width
-    while (textWidth > availableWidth && fontSize > 1) {
-      fontSize -= 1;
-      ctx.font = `${fontSize}px Arial`;
-      textWidth = ctx.measureText(`${robot.team}`).width;
-    }
-
-    // Also ensure that the font size doesn't exceed the available height
-    while (fontSize > availableHeight && fontSize > 1) {
-      fontSize -= 1;
-      ctx.font = `${fontSize}px Arial`;
-    }
-
-    // Draw the text
-    ctx.fillText(
-      `${robot.team}`,
-      normalX(robot.position.x),
-      normalY(robot.position.y)
-    );
-  };
-
-  // Draw the original rectangle
-  drawRectangle(
-    robot.position.x,
-    robot.position.y,
-    1,
-    1,
+  const robotWidth = normalX(0.8);
+  const robotLength = normalX(0.8);
+  const red = "rgba(77, 14, 14, 1)";
+  const blue = "rgba(14, 16, 77, 1)";
+  const redBumper = "rgba(210, 38, 38, 1)";
+  const blueBumper = "rgba(38, 44, 210, 1)";
+  const getBumperSize = (sideSize: number) => sideSize * 1.2;
+  drawRotatedRectangle(
+    ctx,
+    normalX(robot.position.x),
+    normalY(robot.position.y),
+    getBumperSize(robotWidth),
+    getBumperSize(robotLength),
     robot.position.yaw,
-    robot.alliance
+    5,
+    robot.alliance === "RED" ? redBumper : blueBumper
+  );
+  drawRotatedRectangle(
+    ctx,
+    normalX(robot.position.x),
+    normalY(robot.position.y),
+    robotWidth,
+    robotLength,
+    robot.position.yaw,
+    0,
+    robot.alliance === "RED" ? red : blue
   );
 
-  // Calculate the smaller rectangle dimensions (20% smaller)
-  const smallerWidth = 0.8;
-  const smallerLength = 0.8;
+  const text = robot.team.toString(); // Convert the number to a string
+  ctx.font = "bold 15px Arial"; // Set font size and type
+  ctx.fillStyle = "white"; // Set text color to white
+  ctx.textAlign = "center"; // Align text horizontally to the center
+  ctx.textBaseline = "middle"; // Align text vertically to the middle
+  ctx.fillText(text, normalX(robot.position.x), normalY(robot.position.y)); // Draw the text at the given coordina
 
-  // Draw the smaller rectangle inside, with black color
-  drawRectangle(
-    robot.position.x,
-    robot.position.y,
-    smallerWidth,
-    smallerLength,
-    robot.position.yaw,
-    "black"
-  );
+  ctx.beginPath(); // Start a new path
+  ctx.arc(
+    normalX(
+      robot.position.x + (getBumperSize(0.7) / 2) * Math.cos(robot.position.yaw)
+    ),
+    normalY(
+      robot.position.y + (getBumperSize(0.7) / 2) * Math.sin(robot.position.yaw)
+    ),
+    5,
+    0,
+    2 * Math.PI
+  ); // x, y, radius, startAngle, endAngle
+  ctx.fill(); // Fill the circle
+  ctx.strokeStyle = "black";
+  ctx.stroke();
 };
 
 export function draw(
@@ -202,7 +139,7 @@ export function draw(
       position: {
         x: localization.x,
         y: localization.y,
-        yaw: (Math.PI * localization.yaw) / 180,
+        yaw: localization.yaw,
       },
       certainty: 0,
     },

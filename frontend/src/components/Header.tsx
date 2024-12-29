@@ -1,8 +1,8 @@
 import React from "react";
 import { Toolbar, Typography, IconButton } from "@mui/material";
-import { Monitor, Layout } from "lucide-react";
+import MapIcon from "@mui/icons-material/Map";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
-// Define the type for props
 interface HeaderProps {
   isCanvasView: boolean;
   toggleView: () => void;
@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ isCanvasView, toggleView }) => (
       Aurora Dashboard
     </Typography>
     <IconButton onClick={toggleView} sx={{ color: "common.white" }}>
-      {isCanvasView ? <Monitor size={24} /> : <Layout size={24} />}
+      {isCanvasView ? <MapIcon /> : <CameraAltIcon />}
     </IconButton>
   </Toolbar>
 );
