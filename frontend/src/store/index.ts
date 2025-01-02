@@ -1,11 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import deviceReducer from "./deviceSlice";
-import dataReducer from "./dataSlice";
-
+import fusedDataReducer from "./FusedDataSlice";
+import deviceReducer from "./DeviceSlice";
+import layoutReducer from "./LayoutSlice";
 export const store = configureStore({
   reducer: {
-    devices: deviceReducer,
-    data: dataReducer,
+    fused_data_slice: fusedDataReducer,
+    device_slice: deviceReducer,
+    layout_slice: layoutReducer,
   },
 });
 

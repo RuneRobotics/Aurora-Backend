@@ -10,34 +10,48 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { CameraData, Mode, targets, TargetType } from "../../../types";
 import { useState } from "react";
-interface Props {
-  mode: Mode;
-  camera: CameraData;
-}
+import { TargetType } from "../../../types/Constants";
+import { targets } from "../../../types/inputs";
+import { useSelector } from "react-redux";
+import { StoreState } from "../../../store";
 function getAttributes(targetType: TargetType) {
   switch (targetType) {
-    case "robots":
-      return ["team", "certainty", "alliance", "x", "y", "yaw"];
-    case "notes":
-      return ["x", "y", "certainty"];
-    case "apriltags":
-    default:
-      return ["id", "certainty", "x", "y", "z", "roll", "pitch", "yaw"];
+    case TargetType.AprilTag:
+      console.log("hi");
+      return ["id", "distance"];
   }
+  return [];
 }
-const DataPanel: React.FC<Props> = ({ mode, camera }: Props) => {
-  const [targetType, setTargetType] = useState<TargetType>("apriltags");
-  const data = camera.notes;
-  if (mode === "data")
+
+const DataPanel: React.FC = () => {
+  const [targetType, setTargetType] = useState<TargetType>(TargetType.AprilTag);
+  const targets: undefined | targets = useSelector((state: StoreState) => {
+    let cameraIndex: undefined | number = undefined;
+    const id = state.layout_slice.selectedCamera?.id;
+    if (id) {
+      cameraIndex = state.device_slice.cameras.findIndex(
+        (camera) => camera.camera_id === id
+      );
+    }
+    if (cameraIndex === undefined) {
+      return undefined;
+    }
+    return state.device_slice.cameras[cameraIndex].targets;
+  });
+  console.log("rendered");
+
+  if (targets)
     return (
       <Stack>
         <TextField
           select
           label="Target"
           value={targetType}
-          onChange={(e) => setTargetType(e.target.value as TargetType)}
+          onChange={(e) => {
+            console.log("pizza");
+            setTargetType(e.target.value as TargetType);
+          }}
           size="small"
           sx={{
             minWidth: 120,
@@ -60,7 +74,7 @@ const DataPanel: React.FC<Props> = ({ mode, camera }: Props) => {
             },
           }}
         >
-          {targets.map((option) => (
+          {Object.keys(targets).map((option) => (
             <MenuItem key={option} value={option}>
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </MenuItem>
@@ -76,23 +90,24 @@ const DataPanel: React.FC<Props> = ({ mode, camera }: Props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data &&
-                data.map((target, index) => {
-                  const targetAttrs = Object.keys(target);
-                  return (
-                    <TableRow key={index}>
-                      {getAttributes(targetType).map((attr: string, index) => {
-                        if (targetAttrs.includes(attr)) {
-                          return (
-                            <TableCell key={index}>
-                              {
-                                target[attr as keyof typeof target] as
-                                  | number
-                                  | string
-                              }
-                            </TableCell>
-                          );
-                        } else if (
+              {targets[targetType].map((target, index) => {
+                const targetAttrs = Object.keys(target);
+                return (
+                  <TableRow key={index}>
+                    {getAttributes(targetType).map((attr: string, index) => {
+                      console.log(attr);
+                      if (targetAttrs.includes(attr)) {
+                        console.log(attr);
+                        return (
+                          <TableCell key={index}>
+                            {
+                              target[attr as keyof typeof target] as
+                                | number
+                                | string
+                            }
+                          </TableCell>
+                        );
+                      } /* else if (
                           Object.keys(target.position).includes(attr)
                         ) {
                           return (
@@ -104,12 +119,12 @@ const DataPanel: React.FC<Props> = ({ mode, camera }: Props) => {
                               }
                             </TableCell>
                           );
-                        }
-                        return <TableCell key={index}>-</TableCell>;
-                      })}
-                    </TableRow>
-                  );
-                })}
+                        }*/
+                      return <TableCell key={index}>-</TableCell>;
+                    })}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

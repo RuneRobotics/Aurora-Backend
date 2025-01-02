@@ -21,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ width }) => (
   >
     <Toolbar>
       <Typography variant="h6" sx={{ color: "common.white" }}>
-        Devices
+        Device
       </Typography>
     </Toolbar>
     <DeviceList />

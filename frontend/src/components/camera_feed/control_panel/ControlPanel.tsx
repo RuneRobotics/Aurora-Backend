@@ -1,45 +1,35 @@
 import { Box, MenuItem, Paper, TextField, Typography } from "@mui/material";
-import { CameraData, LightingSettings, Mode, modes } from "../../../types";
 import TuningPanel from "./TuningPanel";
 import CalibrationPanel from "./CalibrationPanel";
 import DataPanel from "./DataPanel";
+import { MIN_CONTROL_CARD_WIDTH } from "../../../types/Constants";
+import { StoreState } from "../../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { setMode } from "../../../store/LayoutSlice";
+import { Mode } from "../../../types/state_types";
 
 interface Props {
-  MIN_CONTROL_CARD_WIDTH: number;
   isSmallScreen: boolean;
-  selectedCamera: string | null;
-  setMode: React.Dispatch<React.SetStateAction<Mode>>;
-  mode: Mode;
-  camera: CameraData;
-  settings: LightingSettings;
-  handleTuningChange: (
-    setting: "exposure" | "brightness"
-  ) => (_event: Event, value: number | number[]) => void;
-  calibrationImages: Record<string, string[]>;
-  currentIndex: number;
-  takeSnapshot: () => Promise<void>;
-  imageCount: number;
-  handleDeleteLastImage: () => void;
-  handleNavigateImage: (direction: "prev" | "next") => void;
-  handleFinishCalibration: () => Promise<void>;
 }
-const ControlPanel: React.FC<Props> = ({
-  MIN_CONTROL_CARD_WIDTH,
-  isSmallScreen,
-  selectedCamera,
-  setMode,
-  mode,
-  camera,
-  settings,
-  handleTuningChange,
-  calibrationImages,
-  currentIndex,
-  takeSnapshot,
-  imageCount,
-  handleDeleteLastImage,
-  handleNavigateImage,
-  handleFinishCalibration,
-}: Props) => {
+const PanelFromMode: React.FC<{ mode: Mode }> = ({ mode }: { mode: Mode }) => {
+  switch (mode) {
+    case Mode.Calibration:
+      return <CalibrationPanel />;
+    case Mode.Lighting:
+      return <TuningPanel />;
+  }
+  return <DataPanel />;
+};
+const ControlPanel: React.FC<Props> = ({ isSmallScreen }: Props) => {
+  const dispatch = useDispatch();
+  const selectedCamera = useSelector(
+    (state: StoreState) => state.layout_slice.selectedCamera
+  );
+  const mode = useSelector(
+    (state: StoreState) => state.layout_slice.selectedCamera?.mode
+  );
+  if (!selectedCamera || !mode) return <></>;
+
   return (
     <Paper
       elevation={3}
@@ -73,15 +63,15 @@ const ControlPanel: React.FC<Props> = ({
             textOverflow: "ellipsis",
           }}
         >
-          {selectedCamera
-            ? `Camera ${selectedCamera.split("-camera-")[1]}`
-            : "Camera"}
+          {`Camera ${selectedCamera.id}`}
         </Typography>
         <TextField
           select
           label="Mode"
           value={mode}
-          onChange={(e) => setMode(e.target.value as Mode)}
+          onChange={(e) => {
+            dispatch(setMode(e.target.value as Mode));
+          }}
           size="small"
           sx={{
             minWidth: 120,
@@ -104,33 +94,14 @@ const ControlPanel: React.FC<Props> = ({
             },
           }}
         >
-          {modes.map((option) => (
+          {Object.values(Mode).map((option) => (
             <MenuItem key={option} value={option}>
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </MenuItem>
           ))}
         </TextField>
       </Box>
-
-      <DataPanel mode={mode} camera={camera} />
-
-      <TuningPanel
-        mode={mode}
-        settings={settings}
-        handleTuningChange={handleTuningChange}
-      />
-
-      <CalibrationPanel
-        mode={mode}
-        calibrationImages={calibrationImages}
-        selectedCamera={selectedCamera}
-        currentIndex={currentIndex}
-        takeSnapshot={takeSnapshot}
-        imageCount={imageCount}
-        handleDeleteLastImage={handleDeleteLastImage}
-        handleNavigateImage={handleNavigateImage}
-        handleFinishCalibration={handleFinishCalibration}
-      />
+      <PanelFromMode mode={mode} />
     </Paper>
   );
 };

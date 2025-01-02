@@ -1,20 +1,16 @@
 import Box from "@mui/material/Box";
+import {
+  MIN_CONTROL_CARD_WIDTH,
+  MIN_FEED_HEIGHT,
+  VIDEO_FEED_URL,
+} from "../../types/Constants";
 
 export interface Props {
-  MIN_FEED_HEIGHT: string;
-  MIN_CONTROL_CARD_WIDTH: number;
   isSmallScreen: boolean;
-  VIDEO_FEED_URL: string;
   canvasRef: React.RefObject<HTMLCanvasElement>;
 }
 
-const CameraStream: React.FC<Props> = ({
-  MIN_CONTROL_CARD_WIDTH,
-  MIN_FEED_HEIGHT,
-  isSmallScreen,
-  VIDEO_FEED_URL,
-  canvasRef,
-}: Props) => {
+const CameraStream: React.FC<Props> = ({ isSmallScreen, canvasRef }: Props) => {
   return (
     <Box
       sx={{

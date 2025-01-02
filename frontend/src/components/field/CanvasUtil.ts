@@ -1,4 +1,4 @@
-import { AprilTag, Note, Pose2d, Robot } from "../../types";
+import { Robot, SafePose3d } from "../../types/inputs";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "./consants";
 const drawRotatedRectangle = (
   ctx: CanvasRenderingContext2D,
@@ -28,29 +28,7 @@ const drawRotatedRectangle = (
   // Restore the canvas to its original state
   ctx.restore();
 };
-function drawNote(
-  note: Note,
-  ctx: CanvasRenderingContext2D,
-  normalX: (xVal: number) => number,
-  normalY: (yVal: number) => number
-) {
-  const centerX = normalX(note.position.x);
-  const centerY = normalY(note.position.y);
-  const outerRadius = normalX(0.18);
-  const innerRadius = normalX(0.135); // Set a smaller radius for the empty circle
 
-  // Draw the outer filled circle
-  ctx.fillStyle = "orange";
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "black";
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.fill();
-}
 const drawRobot = (
   robot: Robot,
   normalX: (xVal: number) => number,
@@ -113,37 +91,22 @@ export function draw(
   ctx: CanvasRenderingContext2D,
   height: number,
   width: number,
-  _aprilTags: AprilTag[],
-  robots: Robot[],
-  notes: Note[],
-  localization: Pose2d
+  localization: SafePose3d
 ) {
   const normalX = (xVal: number) => xVal * (width / FIELD_WIDTH);
   const normalY = (yVal: number) => height - yVal * (height / FIELD_HEIGHT);
-
-  notes.forEach((note) => {
-    drawNote(note, ctx, normalX, normalY);
-  });
-
-  robots.forEach((robot) => {
-    drawRobot(robot, normalX, normalY, ctx);
-  });
   // aprilTags.forEach((tag) => {
   //   drawAprilTag(localization, tag, normalX, normalY, ctx);
   // });
-  drawRobot(
-    {
-      team: 6738,
-      alliance: "BLUE",
-      position: {
-        x: localization.x,
-        y: localization.y,
-        yaw: localization.yaw,
+  if (localization !== "unknown")
+    drawRobot(
+      {
+        team: 6738,
+        alliance: "BLUE",
+        position: localization,
       },
-      certainty: 0,
-    },
-    normalX,
-    normalY,
-    ctx
-  );
+      normalX,
+      normalY,
+      ctx
+    );
 }

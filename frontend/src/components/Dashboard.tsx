@@ -1,8 +1,6 @@
 import React from "react";
 import { Box, CssBaseline } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../types";
-import { toggleView } from "../store/deviceSlice";
+import { useSelector } from "react-redux";
 import useResizableSidebar from "../hooks/useResizeableSlider";
 import Header from "./Header";
 import Sidebar from "./SideBar";
@@ -10,13 +8,11 @@ import ResizeHandle from "./ResizeHandler";
 import CameraFeed from "./camera_feed/CameraFeed";
 import { useDataFetching } from "../hooks/useDataFetching";
 import Field from "./field/Field";
+import { StoreState } from "../store";
 
 const Dashboard: React.FC = () => {
   useDataFetching();
-  const dispatch = useDispatch();
-  const isCanvasView = useSelector(
-    (state: RootState) => state.devices.isCanvasView
-  );
+  const view = useSelector((state: StoreState) => state.layout_slice.view);
   const {
     sidebarWidth,
     isResizing,
@@ -49,10 +45,7 @@ const Dashboard: React.FC = () => {
           bgcolor: "background.default",
         }}
       >
-        <Header
-          isCanvasView={isCanvasView}
-          toggleView={() => dispatch(toggleView())}
-        />
+        <Header />
         <Box
           sx={{
             flexGrow: 1,
@@ -63,7 +56,7 @@ const Dashboard: React.FC = () => {
             alignItems: "center",
           }}
         >
-          {isCanvasView ? <Field /> : <CameraFeed />}
+          {view === "Field" ? <Field /> : <CameraFeed />}
         </Box>
       </Box>
       <ResizeHandle onMouseDown={handleMouseDown} isResizing={isResizing} />

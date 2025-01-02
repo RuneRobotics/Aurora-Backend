@@ -10,7 +10,9 @@ const Field: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [backgroundImage, setBackgroundImage] =
     useState<HTMLImageElement | null>(null);
-  const data = useSelector((state: StoreState) => state.data);
+  const localization = useSelector(
+    (state: StoreState) => state.fused_data_slice.robot_position
+  );
 
   // Load the background image on mount
   useEffect(() => {
@@ -59,23 +61,7 @@ const Field: React.FC = () => {
         context.drawImage(backgroundImage, 0, 0, width, height);
 
         // Draw additional elements on canvas
-        draw(
-          context,
-          height,
-          width,
-          data.data?.fused_data.targets.apriltags != null
-            ? data.data?.fused_data.targets.apriltags
-            : [],
-          data.data?.fused_data.targets.robots != null
-            ? data.data?.fused_data.targets.robots
-            : [],
-          data.data?.fused_data.targets.notes != null
-            ? data.data?.fused_data.targets.notes
-            : [],
-          data.data?.fused_data.position != null
-            ? data.data?.fused_data.position
-            : { x: 0, y: 0, yaw: 0 }
-        );
+        draw(context, height, width, localization);
       }
       animationFrameId = requestAnimationFrame(drawFrame);
     };
@@ -92,21 +78,7 @@ const Field: React.FC = () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resizeAndDraw);
     };
-  }, [
-    backgroundImage,
-    data.data?.fused_data.targets.apriltags != null
-      ? data.data?.fused_data.targets.apriltags
-      : [],
-    data.data?.fused_data.targets.robots != null
-      ? data.data?.fused_data.targets.robots
-      : [],
-    data.data?.fused_data.targets.notes != null
-      ? data.data?.fused_data.targets.notes
-      : [],
-    data.data?.fused_data.position != null
-      ? data.data?.fused_data.position
-      : { x: 0, y: 0, yaw: 0 },
-  ]);
+  }, [backgroundImage, localization]);
   return (
     <FieldContainer>
       <canvas ref={canvasRef} />
