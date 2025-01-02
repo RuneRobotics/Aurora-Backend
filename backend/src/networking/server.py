@@ -26,7 +26,7 @@ def not_found(e):
 
 
 # Example API route
-@app.route("/data", methods=["GET"])
+@app.route("/api/data", methods=["GET"])
 def get_data():
     output_file_path = Path(__file__).parent / Path("../../output/output.json")
     return jsonify(json_to_dict(output_file_path))

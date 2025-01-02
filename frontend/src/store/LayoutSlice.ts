@@ -44,7 +44,7 @@ const LayoutSlice = createSlice({
       };
     },
     toggleView: (state) => {
-      if (state.view == View.Field) {
+      if (state.view === View.Field) {
         state.view = View.Camera;
         return;
       }
