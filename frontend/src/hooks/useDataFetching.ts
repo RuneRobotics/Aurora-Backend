@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Input } from "../types/inputs";
-import { setCameras } from "../store/DeviceSlice";
+import { setCameras } from "../store/CoProcessorSlice";
 import { setRobotPosition, setTags } from "../store/FusedDataSlice";
 const FETCH_INTERVAL = 100; // 100ms interval for real-time updates
 
@@ -12,7 +12,7 @@ export const useDataFetching = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/data");
+        const response = await fetch("http://localhost:5800/api/data");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }

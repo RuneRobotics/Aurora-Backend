@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fusedDataReducer from "./FusedDataSlice";
-import deviceReducer from "./DeviceSlice";
+import deviceReducer from "./CoProcessorSlice";
 import layoutReducer from "./LayoutSlice";
 export const store = configureStore({
   reducer: {
