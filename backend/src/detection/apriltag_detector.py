@@ -67,7 +67,7 @@ class AprilTagDetector:
         self.camera.frame = frame
         camera_position = self.__get_weighted_camera_pose(camera_poses)
         self.camera.deteceted_apriltags = detected_apriltags
-        self.camera.field_position = camera_position
+        self.camera.field_pose = camera_position
         robot_pose = self.camera.get_robot_pose()
         self.camera.add_pose_to_queue(robot_pose)
     
@@ -77,7 +77,7 @@ class AprilTagDetector:
         total_scores = sum(position[2] for position in camera_positions)
         
         if total_scores == 0:
-            return {}
+            return None
 
         weighted_camera_position = [0, 0, 0]
         weighted_euler_angles = [0, 0, 0]
@@ -126,20 +126,19 @@ class AprilTagDetector:
             singular = sy < 1e-6
 
             if not singular:
-                theta = -np.arctan2(R[2, 1], R[2, 2])
+                theta = np.arctan2(R[2, 1], R[2, 2]) + np.pi/2
                 psi = np.arctan2(-R[2, 0], sy)
                 phi = np.arctan2(R[1, 0], R[0, 0]) + np.pi/2
             else:
-                theta = np.arctan2(-R[1, 2], R[1, 1])
+                theta = np.arctan2(-R[1, 2], R[1, 1]) + np.pi/2
                 psi = np.arctan2(-R[2, 0], sy)
-                phi = 0
+                phi =  np.pi/2
 
             return np.array([psi, theta, phi])
 
         euler_angles = rotation_matrix_to_euler_angles(rotation_matrix_inv)
         
         camera_position = camera_position.flatten()
-        euler_angles = np.degrees(euler_angles)
 
         return camera_position, euler_angles
 
@@ -178,15 +177,3 @@ class AprilTagDetector:
             tag_world_corners.append([x_world, y_world, z_world])
 
         return np.array(tag_world_corners, dtype=np.float32)
-
-
-    def __get_tag_pose(self, tag_position, tag_euler_angles, tag_id, tag_score):
-
-        pose = {"x": tag_position[0],
-                    "y": tag_position[1],
-                    "z": tag_position[2],
-                    "roll": tag_euler_angles[0],
-                    "pitch": tag_euler_angles[1],
-                    "yaw": tag_euler_angles[2]}
-
-        return {"position": pose, "certainty": tag_score, "id": tag_id}

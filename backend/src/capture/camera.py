@@ -1,9 +1,10 @@
 import numpy as np
 from queue import Queue
 from utils import constants
+from scipy.spatial.transform import Rotation as R
 
 class Pose3D:
-    def __init__(self, x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, roll=0.0, pitch=0.0, yaw=0.0):
         self.x = x
         self.y = y
         self.z = z
@@ -14,7 +15,7 @@ class Pose3D:
 class Camera:
     def __init__(self,
                  id,
-                 position_on_robot: Pose3D=Pose3D(), 
+                 pose_on_robot: Pose3D=Pose3D(), 
                  matrix = np.array([[600, 0, 320],  # fx, 0, cx
                                     [0, 600, 240],  # 0, fy, cy
                                     [0, 0, 1]], dtype=np.float32),
@@ -23,19 +24,38 @@ class Camera:
         self.robot_pose_queue = Queue(maxsize=constants.QUEUE_SIZE)
         self.deteceted_apriltags = []
         self.id = id
-        self.position_on_robot = position_on_robot
-        self.field_position = None
+        self.pose_on_robot = pose_on_robot
+        self.field_pose = None
         self.matrix = matrix
         self.dist_coeffs = dist_coeffs
         self.frame = None
 
     def get_robot_pose(self):
-        if self.field_position is None:
-            return None
         
-        # NEEDS TO BE IMPLEMENTED
-        # this return value is just for now
-        return self.field_position
+
+        if not isinstance(self.field_pose, Pose3D):
+            return None
+
+        camera_field_euler_angles = [self.field_pose.yaw, 
+                                     self.field_pose.pitch, 
+                                     self.field_pose.roll]
+        
+        camera_robot_euler_angles = [self.pose_on_robot.yaw, 
+                                     self.pose_on_robot.pitch, 
+                                     self.pose_on_robot.roll]
+        
+        def euler_to_mat(euler_angles: list):
+            return R.from_euler("zyx", euler_angles).as_matrix()
+        
+        field_to_camera_mat = euler_to_mat(camera_field_euler_angles)
+        robot_to_camera_mat = euler_to_mat(camera_robot_euler_angles)
+
+        field_to_robot_mat = np.linalg.inv(robot_to_camera_mat) @ field_to_camera_mat
+
+        yaw, pitch, roll = R.from_matrix(field_to_robot_mat).as_euler("zyx", degrees=True)
+
+        return Pose3D(x=0, y=0, z=0, roll=roll, pitch=pitch, yaw=yaw)
+
 
     def add_pose_to_queue(self, pose):
 
