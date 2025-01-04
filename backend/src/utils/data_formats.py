@@ -11,7 +11,8 @@ def data_format(cameras: list, targets_dict, robot_position):
 def camera_format(camera: Camera):
 
     return {"camera_id": camera.id,
-            "targets": {"april_tags": camera.deteceted_apriltags},
+            "targets": {"april_tags": {"id": camera.deteceted_apriltags,
+                                       "distance": 0}},
             "camera_position": pose3d_format_deg(camera.field_pose)}
 
 

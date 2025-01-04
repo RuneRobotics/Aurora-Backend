@@ -44,17 +44,36 @@ class Camera:
                                      self.pose_on_robot.pitch, 
                                      self.pose_on_robot.roll]
         
+        camera_field_position = np.array([self.field_pose.x, 
+                                          self.field_pose.y, 
+                                          self.field_pose.z])
+        
+        camera_robot_position = np.array([self.pose_on_robot.x, 
+                                          self.pose_on_robot.y, 
+                                          self.pose_on_robot.z])
+
         def euler_to_mat(euler_angles: list):
             return R.from_euler("zyx", euler_angles).as_matrix()
         
         field_to_camera_mat = euler_to_mat(camera_field_euler_angles)
         robot_to_camera_mat = euler_to_mat(camera_robot_euler_angles)
 
-        field_to_robot_mat = np.linalg.inv(robot_to_camera_mat) @ field_to_camera_mat
+        field_to_robot_rotation = np.linalg.inv(robot_to_camera_mat) @ field_to_camera_mat
+        #field_to_robot_translation = camera_field_position - np.linalg.inv(field_to_camera_mat) @ robot_to_camera_mat @ camera_robot_position
 
-        yaw, pitch, roll = R.from_matrix(field_to_robot_mat).as_euler("zyx", degrees=True)
+        field_to_robot_translation = (
+        camera_field_position 
+        - field_to_camera_mat @ camera_robot_position
+        )
 
-        return Pose3D(x=0, y=0, z=0, roll=roll, pitch=pitch, yaw=yaw)
+        print("camera field position", self.field_pose.x, self.field_pose.y)
+
+        x, y, z = field_to_robot_translation
+        yaw, pitch, roll = R.from_matrix(field_to_robot_rotation).as_euler("zyx")
+
+        print("robot field position", x, y)
+        
+        return Pose3D(x=x, y=y, z=z, roll=roll, pitch=pitch, yaw=yaw)
 
 
     def add_pose_to_queue(self, pose):
