@@ -33,7 +33,7 @@ class AprilTagDetector:
         detections = self.__detect(frame=frame)
 
         if len(detections) == 0:
-            return constants.UNKOWN, constants.UNKOWN
+            return constants.UNKNOWN, constants.UNKNOWN
 
         for tag in detections:
 

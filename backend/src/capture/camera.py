@@ -43,35 +43,39 @@ class Camera:
         camera_robot_euler_angles = [self.pose_on_robot.yaw, 
                                      self.pose_on_robot.pitch, 
                                      self.pose_on_robot.roll]
-        
-        camera_field_position = np.array([self.field_pose.x, 
-                                          self.field_pose.y, 
-                                          self.field_pose.z])
-        
-        camera_robot_position = np.array([self.pose_on_robot.x, 
-                                          self.pose_on_robot.y, 
-                                          self.pose_on_robot.z])
 
         def euler_to_mat(euler_angles: list):
             return R.from_euler("zyx", euler_angles).as_matrix()
         
-        field_to_camera_mat = euler_to_mat(camera_field_euler_angles)
-        robot_to_camera_mat = euler_to_mat(camera_robot_euler_angles)
+        R_robot_to_camera = euler_to_mat(camera_robot_euler_angles)
+        t_robot_to_camera = np.array([self.pose_on_robot.x, 
+                                      self.pose_on_robot.y, 
+                                      self.pose_on_robot.z])
+        T_robot_to_camera = np.eye(4)
+        T_robot_to_camera[:3, :3] = R_robot_to_camera
+        T_robot_to_camera[:3, 3] = t_robot_to_camera
 
-        field_to_robot_rotation = np.linalg.inv(robot_to_camera_mat) @ field_to_camera_mat
-        #field_to_robot_translation = camera_field_position - np.linalg.inv(field_to_camera_mat) @ robot_to_camera_mat @ camera_robot_position
+        R_field_to_camera = euler_to_mat(camera_field_euler_angles)
+        t_field_to_camera = np.array([self.field_pose.x,
+                                      self.field_pose.y, 
+                                      self.field_pose.z])
+        T_field_to_camera = np.eye(4)
+        T_field_to_camera[:3, :3] = R_field_to_camera
+        T_field_to_camera[:3, 3] = t_field_to_camera
 
-        field_to_robot_translation = (
-        camera_field_position 
-        - field_to_camera_mat @ camera_robot_position
-        )
+        T_robot_to_camera_inv = np.eye(4)
+        T_robot_to_camera_inv[:3, :3] = R_robot_to_camera.T
+        T_robot_to_camera_inv[:3, 3] = -R_robot_to_camera.T @ t_robot_to_camera
+        T_field_to_robot = T_field_to_camera @ T_robot_to_camera_inv
 
-        print("camera field position", self.field_pose.x, self.field_pose.y)
+        x, y, z = T_field_to_robot[:3, 3]
+        robot_orientation = R.from_matrix(T_field_to_robot[:3, :3])
+        yaw, pitch, roll = robot_orientation.as_euler('zyx', degrees=False)
 
-        x, y, z = field_to_robot_translation
-        yaw, pitch, roll = R.from_matrix(field_to_robot_rotation).as_euler("zyx")
-
-        print("robot field position", x, y)
+        #print("camera field position", self.field_pose.x, self.field_pose.y)
+        #print("robot position", x, y)
+        #print("camera orientation", *camera_field_euler_angles)
+        #print("robot field orientation", roll, pitch, yaw)
         
         return Pose3D(x=x, y=y, z=z, roll=roll, pitch=pitch, yaw=yaw)
 

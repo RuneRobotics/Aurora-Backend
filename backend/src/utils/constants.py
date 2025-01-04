@@ -3,7 +3,7 @@ CRESCENDO = 2024
 REEFSCAPE = 2025
 
 # other constants
-UNKOWN = 'unkown'
+UNKNOWN = 'unknown'
 TAB = 4
 PURPLE = (255, 110, 200)
 
@@ -12,6 +12,6 @@ PURPLE = (255, 110, 200)
 DASHBOARD_PORT = 5800
 
 # metrics
-QUEUE_SIZE = 10
+QUEUE_SIZE = 25
 TAG_HALF_SIZE = 0.5 * ((6.5 * 2.54) / 100)
 UPDATE_INTERVAL = 0.02

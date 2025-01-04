@@ -51,6 +51,38 @@ def detection_process(camera: Camera, season: int):
     cv2.destroyAllWindows()
 
 
+def average_pose3d(pose_queue):
+    total_x = total_y = total_z = 0.0
+    total_roll = total_pitch = total_yaw = 0.0
+    count = 0
+
+    # Create a copy of the queue to iterate without removing elements
+    queue_list = list(pose_queue.queue)
+
+    for pose in queue_list:
+        total_x += pose.x
+        total_y += pose.y
+        total_z += pose.z
+        total_roll += pose.roll
+        total_pitch += pose.pitch
+        total_yaw += pose.yaw
+        count += 1
+
+    if count == 0:
+        return Pose3D()  # Return a default Pose3D if queue is empty
+
+    avg_pose = Pose3D(
+        x=total_x / count,
+        y=total_y / count,
+        z=total_z / count,
+        roll=total_roll / count,
+        pitch=total_pitch / count,
+        yaw=total_yaw / count
+    )
+
+    return avg_pose
+
+
 def data_fusion(cameras: List[Camera]):
 
     global output
@@ -62,10 +94,14 @@ def data_fusion(cameras: List[Camera]):
         for camera in cameras:
             queues.append(camera.robot_pose_queue)
 
+        # here i want to take avg of the queues[0] values, but i dont want to harm the original queuesp0[ queue]
+        copy_queue = queues[0]
+        avg_pose = average_pose3d(copy_queue)
+
         with data_lock:
-            output = data_format(cameras, {}, queues[0].get())
+            output = data_format(cameras, {}, avg_pose)
     
-        time.sleep(constants.UPDATE_INTERVAL * 25)
+        time.sleep(constants.UPDATE_INTERVAL)
 
 
 def open_all_cameras_and_process(detection_process, camera_list: list, season: int):
@@ -114,7 +150,7 @@ def get_data():
 
 if __name__ == '__main__':
     
-    camera_1 = Camera(id=0, pose_on_robot=Pose3D(x=1, y=1, yaw=np.pi/4))
+    camera_1 = Camera(id=0)
     camera_list = [camera_1]
     threading.Thread(target=open_all_cameras_and_process, args=(detection_process, camera_list, constants.CRESCENDO), daemon=True).start()
     app.run(debug=False, port=constants.DASHBOARD_PORT)

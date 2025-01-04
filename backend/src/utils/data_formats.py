@@ -34,7 +34,7 @@ def pose3d_format(pose: Pose3D):
                 "yaw": pose.yaw}
     except:
 
-        return constants.UNKOWN
+        return constants.UNKNOWN
     
     
 def pose3d_format_deg(pose: Pose3D):
