@@ -22,7 +22,7 @@ class Camera:
                 dist_coeffs = np.zeros((4, 1))):
         
         self.robot_pose_queue = Queue(maxsize=constants.QUEUE_SIZE)
-        self.deteceted_apriltags = []
+        self.detected_apriltags = []
         self.id = id
         self.pose_on_robot = pose_on_robot
         self.field_pose = None

@@ -66,7 +66,7 @@ class AprilTagDetector:
 
         self.camera.frame = frame
         camera_position = self.__get_weighted_camera_pose(camera_poses)
-        self.camera.deteceted_apriltags = detected_apriltags
+        self.camera.detected_apriltags = detected_apriltags
         self.camera.field_pose = camera_position
         robot_pose = self.camera.get_robot_pose()
         self.camera.add_pose_to_queue(robot_pose)
