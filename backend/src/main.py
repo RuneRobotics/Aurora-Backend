@@ -2,7 +2,7 @@ from detection.apriltag_detector import AprilTagDetector
 from flask import Flask, send_from_directory, jsonify
 from concurrent.futures import ThreadPoolExecutor
 from capture.camera_manager import open_stream
-from utils.data_formats import data_format
+from utils.output_formats import data_format
 from capture.camera import Camera, Pose3D
 from threading import Thread
 from queue import Queue
@@ -84,8 +84,6 @@ def data_fusion(cameras: List[Camera]):
 
     while(True):
 
-        queues = []
-
         avg_poses = Queue()
 
         for camera in cameras:
@@ -138,12 +136,12 @@ def get_data():
     global output
 
     with data_lock:
-        return jsonify(output) # update the output dict here
+        return jsonify(output)
     
 
 if __name__ == '__main__':
     
     camera_1 = Camera(id=0)
     camera_list = [camera_1]
-    threading.Thread(target=open_all_cameras_and_process, args=(detection_process, camera_list, constants.CRESCENDO), daemon=True).start()
+    threading.Thread(target=open_all_cameras_and_process, args=(detection_process, camera_list, constants.REEFSCAPE), daemon=True).start()
     app.run(debug=False, port=constants.DASHBOARD_PORT)

@@ -3,7 +3,7 @@ from typing import List
 from pathlib import Path
 from utils import constants
 from capture.camera import Camera, Pose3D
-from utils.data_formats import pose3d_format, data_format
+from utils.output_formats import pose3d_format, data_format
 from slam.kalman_filter import KalmanFilter
 import time
 from math import radians, degrees, pi
