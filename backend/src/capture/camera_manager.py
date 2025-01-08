@@ -2,7 +2,6 @@ from capture.camera import Camera, Pose3D
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
-from slam.sensor_fusion import data_fusion
 from utils import constants
 from queue import Queue
 import cv2
@@ -19,10 +18,10 @@ def open_stream(input_source):
     return cap
 
 
-def open_all_cameras_and_process(detection_process, camera_list: list, season: int, output: Path):
+def open_all_cameras_and_process(data_fusion, detection_process, camera_list: list, season: int):
 
     # Start the fusion process in a separate thread
-    fusion_thread = Thread(target=data_fusion, args=(camera_list, output))
+    fusion_thread = Thread(target=data_fusion, args=(camera_list, ))
     fusion_thread.start()
 
     # Start detection process in parallel for each camera
@@ -36,3 +35,4 @@ def open_all_cameras_and_process(detection_process, camera_list: list, season: i
             future.result()  # This will raise exceptions if any occurred
 
     fusion_thread.join()
+    
