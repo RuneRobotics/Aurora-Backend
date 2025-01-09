@@ -158,7 +158,6 @@ class AprilTagDetector:
         rotation = R.from_quat([x, y, z, w])
 
         euler_angles = rotation.as_euler('xyz', degrees=False)
-        print("Euler Angles (Roll, Pitch, Yaw):", euler_angles)
         
         tag_corners_local = np.array([
             [0, -tag_half_size, -tag_half_size],  # Bottom-left
