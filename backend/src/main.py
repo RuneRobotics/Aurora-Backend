@@ -5,10 +5,10 @@ from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
 from capture.camera import Camera
 from utils import constants
+from waitress import serve
 from queue import Queue
 from typing import List
 import threading
-import time
 import time
 import cv2
 
@@ -16,47 +16,40 @@ app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 data_lock = threading.Lock()
 output = {}
 
-
 def data_fusion(cameras: List[Camera]):
-
     global output
 
-    while(True):
-
+    while True:
         avg_poses = Queue()
 
         for camera in cameras:
             copy_queue = camera.robot_pose_queue
-            avg_poses.put(average_pose3d(copy_queue)) # need to replace with weighted avg
+            avg_poses.put(average_pose3d(copy_queue))  # need to replace with weighted avg
 
         avg_pose = average_pose3d(avg_poses)
 
         with data_lock:
             output = data_format(cameras, {}, avg_pose)
-    
-        time.sleep(constants.UPDATE_INTERVAL)
 
+        time.sleep(constants.UPDATE_INTERVAL)
 
 # Serve React static files
 @app.route("/")
-def serve():
+def serve_static():
     return send_from_directory(app.static_folder, "index.html")
-
 
 # Serve the React app for all frontend routes
 @app.errorhandler(404)
 def not_found(e):
     return send_from_directory(app.static_folder, "index.html")
 
-
 # Example API route
-@app.route("/api/data", methods=["GET"]) 
+@app.route("/api/data", methods=["GET"])
 def get_data():
     global output
 
     with data_lock:
         return jsonify(output)
-    
 
 @app.route("/stream_<int:camera_id>")
 def stream(camera_id):
@@ -72,7 +65,7 @@ def stream(camera_id):
             frame = camera.frame  # You need to implement this method in the Camera class
             if frame is None:
                 break  # Stop if no frame is available
-            
+
             # Convert the frame to JPEG format for streaming
             ret, jpeg = cv2.imencode('.jpg', frame)
             if not ret:
@@ -84,10 +77,10 @@ def stream(camera_id):
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 if __name__ == '__main__':
-    
     camera_1 = Camera(id=0)
     camera_list = [camera_1]
     threading.Thread(target=open_all_cameras_and_process, args=(data_fusion, run_detection, camera_list, constants.REEFSCAPE), daemon=True).start()
-    app.run(debug=False, port=constants.DASHBOARD_PORT)
+
+    # Use Waitress to serve the Flask app (this replaces app.run)
+    serve(app, host='0.0.0.0', port=constants.DASHBOARD_PORT)
