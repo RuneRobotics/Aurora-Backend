@@ -1,3 +1,4 @@
+from scipy.spatial.transform import Rotation as R
 from capture.camera import Camera, Pose3D
 from utils.json_utils import load_field
 from utils import constants
@@ -142,37 +143,32 @@ class AprilTagDetector:
         return camera_position, euler_angles
 
 
+    
     def __get_tag_world_corners(self, tag_pose):
 
-        # MOVE TO A DIFFERENT FILE AND DO THAT ELSEWHERE
-        tag_half_size = 0.5 * ((6.5 * 2.54) / 100)  # Convert from inches to meters
-
+        tag_half_size = constants.TAG_HALF_SIZE
+        
         tag_x_world = tag_pose["translation"]["x"]
         tag_y_world = tag_pose["translation"]["y"]
         tag_z_world = tag_pose["translation"]["z"]
-        tag_theta_world = 2 * math.acos(tag_pose["rotation"]["quaternion"]["W"])
+        
+        tag_quaternion = tag_pose["rotation"]["quaternion"]
+        w, x, y, z = tag_quaternion["W"], tag_quaternion["X"], tag_quaternion["Y"], tag_quaternion["Z"]
+        
+        rotation = R.from_quat([x, y, z, w])
 
-        cos = np.cos(np.pi - tag_theta_world)
-        sin = np.sin(np.pi - tag_theta_world)
-
-        local_corners = np.array([
-            [tag_half_size, tag_half_size, -tag_half_size],   # Bottom left
-            [-tag_half_size, -tag_half_size, -tag_half_size],   # Bottom right
-            [-tag_half_size, -tag_half_size, tag_half_size],    # Top right
-            [tag_half_size, tag_half_size, tag_half_size]   # Top left
+        euler_angles = rotation.as_euler('xyz', degrees=False)
+        print("Euler Angles (Roll, Pitch, Yaw):", euler_angles)
+        
+        tag_corners_local = np.array([
+            [0, -tag_half_size, -tag_half_size],  # Bottom-left
+            [0, tag_half_size, -tag_half_size],   # Bottom-right
+            [0, tag_half_size, tag_half_size],    # Top-right
+            [0, -tag_half_size, tag_half_size]    # Top-left
         ])
         
-        tag_world_corners = []
-        for corner in local_corners:
-            x_local, y_local, z_local = corner
-            
-            x_rotated = x_local * sin
-            y_rotated = x_local * cos
-
-            x_world = tag_x_world + x_rotated
-            y_world = tag_y_world + y_rotated
-            z_world = tag_z_world + z_local
-
-            tag_world_corners.append([x_world, y_world, z_world])
-
-        return np.array(tag_world_corners, dtype=np.float32)
+        tag_corners_rotated = rotation.apply(tag_corners_local)
+        
+        tag_corners_world = tag_corners_rotated + np.array([tag_x_world, tag_y_world, tag_z_world])
+        
+        return np.array(tag_corners_world, dtype=np.float64)
