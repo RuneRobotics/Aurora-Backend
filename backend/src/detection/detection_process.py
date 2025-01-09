@@ -18,6 +18,7 @@ def run_detection(camera: Camera, season: int):
 
     while True:
         ret, frame = cap.read()
+        camera.frame = frame
         if not ret:
             logging.error(f"Error: Failed to capture image from camera {camera.id}.")
             continue

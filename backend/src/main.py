@@ -1,5 +1,5 @@
 from capture.camera_manager import open_stream, open_all_cameras_and_process
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, Response, send_from_directory, jsonify
 from detection.detection_process import run_detection
 from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
@@ -9,6 +9,8 @@ from queue import Queue
 from typing import List
 import threading
 import time
+import time
+import cv2
 
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 data_lock = threading.Lock()
@@ -55,6 +57,33 @@ def get_data():
     with data_lock:
         return jsonify(output)
     
+
+@app.route("/stream_<int:camera_id>")
+def stream(camera_id):
+    # Find the camera by ID
+    camera = next((cam for cam in camera_list if cam.id == camera_id), None)
+    if camera is None:
+        return "Camera not found", 404
+
+    # Create a generator to stream frames
+    def generate():
+        while True:
+            # Get the latest frame from the camera (assuming the camera has a method like `get_frame()`)
+            frame = camera.frame  # You need to implement this method in the Camera class
+            if frame is None:
+                break  # Stop if no frame is available
+            
+            # Convert the frame to JPEG format for streaming
+            ret, jpeg = cv2.imencode('.jpg', frame)
+            if not ret:
+                break
+
+            # Yield the frame as a multipart response (MJPEG format)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
+
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 if __name__ == '__main__':
     

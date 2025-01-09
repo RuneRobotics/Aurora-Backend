@@ -64,7 +64,6 @@ class AprilTagDetector:
             detected_apriltags.append(tag_id)
             camera_poses.append((camera_position, euler_angles, 1)) # 1 should be replaced with the tag certainty
 
-        self.camera.frame = frame
         camera_position = self.__get_weighted_camera_pose(camera_poses)
         self.camera.detected_apriltags = detected_apriltags
         self.camera.field_pose = camera_position
