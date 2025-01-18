@@ -1,5 +1,7 @@
 export const UN_DEFINED_IP = "0.0.0.0";
-export const VIDEO_FEED_URL = "http://localhost:5801/stream.mjpg";
+export function getVideoFeedURL(index: number) {
+  return `/stream_${index}`;
+}
 export const MIN_CALIBRATION_IMAGES = 24;
 export const MIN_CONTROL_CARD_WIDTH = 250;
 export const MIN_FEED_HEIGHT = "50vh";

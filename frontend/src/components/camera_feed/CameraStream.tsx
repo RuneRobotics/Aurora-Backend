@@ -1,9 +1,11 @@
 import Box from "@mui/material/Box";
 import {
+  getVideoFeedURL,
   MIN_CONTROL_CARD_WIDTH,
   MIN_FEED_HEIGHT,
-  VIDEO_FEED_URL,
 } from "../../types/Constants";
+import { useSelector } from "react-redux";
+import { StoreState } from "../../store";
 
 export interface Props {
   isSmallScreen: boolean;
@@ -11,6 +13,10 @@ export interface Props {
 }
 
 const CameraStream: React.FC<Props> = ({ isSmallScreen, canvasRef }: Props) => {
+  const cameraIndex = useSelector((state: StoreState) => {
+    state.layout_slice.selectedCamera?.id;
+  });
+  if (cameraIndex === undefined) return <></>;
   return (
     <Box
       sx={{
@@ -24,7 +30,7 @@ const CameraStream: React.FC<Props> = ({ isSmallScreen, canvasRef }: Props) => {
       }}
     >
       <img
-        src={VIDEO_FEED_URL}
+        src={getVideoFeedURL(cameraIndex)}
         alt="Camera Feed"
         style={{
           width: "100%",

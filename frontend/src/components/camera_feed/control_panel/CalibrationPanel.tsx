@@ -10,8 +10,8 @@ import {
   navigateImage,
 } from "../../../store/LayoutSlice";
 import {
+  getVideoFeedURL,
   MIN_CALIBRATION_IMAGES,
-  VIDEO_FEED_URL,
 } from "../../../types/Constants";
 
 const CalibrationPanel: React.FC = () => {
@@ -87,7 +87,7 @@ const CalibrationPanel: React.FC = () => {
       >
         <img
           ref={videoFeedRef}
-          src={VIDEO_FEED_URL}
+          src={getVideoFeedURL(cameraState.currentIndex || 0)}
           alt="Live Feed"
           style={{
             width: "100%",
