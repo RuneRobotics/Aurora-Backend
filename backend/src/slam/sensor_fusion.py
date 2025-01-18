@@ -58,3 +58,42 @@ def average_pose3d(pose_queue):
     )
 
     return avg_pose
+def ema_pose3d(old_state: Pose3D, reading: Pose3D, alpha: float) -> Pose3D:
+    """
+    Perform Exponential Moving Average (EMA) for a Pose3D object.
+
+    Parameters:
+        old_state (Pose3D): The previous state.
+        reading (Pose3D): The new reading to incorporate.
+        alpha (float): The smoothing factor (0 < alpha <= 1).
+
+    Returns:
+        Pose3D: The updated state after applying EMA.
+    """
+    # Linear components (x, y, z) use standard EMA
+    new_x = alpha * reading.x + (1 - alpha) * old_state.x
+    new_y = alpha * reading.y + (1 - alpha) * old_state.y
+    new_z = alpha * reading.z + (1 - alpha) * old_state.z
+
+    # Angular components (roll, pitch, yaw) use sine and cosine for EMA
+    roll_sin = alpha * np.sin(reading.roll) + (1 - alpha) * np.sin(old_state.roll)
+    roll_cos = alpha * np.cos(reading.roll) + (1 - alpha) * np.cos(old_state.roll)
+    new_roll = np.arctan2(roll_sin, roll_cos)
+
+    pitch_sin = alpha * np.sin(reading.pitch) + (1 - alpha) * np.sin(old_state.pitch)
+    pitch_cos = alpha * np.cos(reading.pitch) + (1 - alpha) * np.cos(old_state.pitch)
+    new_pitch = np.arctan2(pitch_sin, pitch_cos)
+
+    yaw_sin = alpha * np.sin(reading.yaw) + (1 - alpha) * np.sin(old_state.yaw)
+    yaw_cos = alpha * np.cos(reading.yaw) + (1 - alpha) * np.cos(old_state.yaw)
+    new_yaw = np.arctan2(yaw_sin, yaw_cos)
+
+    # Return the updated Pose3D
+    return Pose3D(
+        x=new_x,
+        y=new_y,
+        z=new_z,
+        roll=new_roll,
+        pitch=new_pitch,
+        yaw=new_yaw
+    )
