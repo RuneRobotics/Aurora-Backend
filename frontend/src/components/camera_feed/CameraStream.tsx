@@ -14,7 +14,7 @@ export interface Props {
 
 const CameraStream: React.FC<Props> = ({ isSmallScreen, canvasRef }: Props) => {
   const cameraIndex = useSelector((state: StoreState) => {
-    state.layout_slice.selectedCamera?.id;
+    return state.layout_slice.selectedCamera?.id;
   });
   if (cameraIndex === undefined) return <></>;
   return (
