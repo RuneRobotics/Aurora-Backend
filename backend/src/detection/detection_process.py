@@ -24,7 +24,6 @@ def run_detection(camera: Camera, season: int):
             continue
 
         apriltag_detector.get_camera_and_tags_data(frame=frame)
-        cv2.imshow(f'Camera {camera.id} Detection', frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
