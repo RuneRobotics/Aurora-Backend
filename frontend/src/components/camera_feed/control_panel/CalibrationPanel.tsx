@@ -84,18 +84,7 @@ const CalibrationPanel: React.FC = () => {
           bgcolor: "background.default",
           mb: 2,
         }}
-      >
-        <img
-          ref={videoFeedRef}
-          src={getVideoFeedURL(cameraState.currentIndex || 0)}
-          alt="Live Feed"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-          }}
-        />
-      </Box>
+      ></Box>
 
       {/* Current Snapshot */}
       {imageCount > 0 && cameraState.currentIndex !== undefined && (
