@@ -1,16 +1,19 @@
-from capture.camera import Camera, Pose3D
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
+from capture.camera import Camera
 from threading import Thread
-from utils import constants
-from queue import Queue
 import cv2
-from multiprocessing import Process
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
 
 
-def open_stream(input_source):
+def open_stream(input_source: str | int) -> cv2.VideoCapture | None:
+    """
+    Open a video stream from an input source.
+
+    Args:
+        input_source (str | int): Path to the video file or camera index.
+
+    Returns:
+        cv2.VideoCapture | None: Opened video capture object if successful, or None if failed.
+    """
     cap = cv2.VideoCapture(input_source)
     if not cap.isOpened():
         print(f"Error: Could not open the input source {input_source}.")
@@ -18,21 +21,27 @@ def open_stream(input_source):
     return cap
 
 
-def open_all_cameras_and_process(data_fusion, detection_process, camera_list: list, season: int):
+def open_all_cameras_and_process(
+    data_fusion: callable, 
+    detection_process: callable, 
+    camera_list: list[Camera], 
+    season: int
+) -> None:
+    """
+    Open all cameras and process data using fusion and detection processes.
 
-    # Start the fusion process in a separate thread
-    fusion_thread = Thread(target=data_fusion, args=(camera_list, ))
+    Args:
+        data_fusion (callable): Function to perform data fusion.
+        detection_process (callable): Function to perform detection for each camera.
+        camera_list (list[Camera]): List of Camera objects to process.
+        season (int): Identifier for the current season.
+    """
+    fusion_thread = Thread(target=data_fusion, args=(camera_list,))
     fusion_thread.start()
 
-    # Start detection process in parallel for each camera
     with ThreadPoolExecutor() as executor:
-        futures = []
-        for camera in camera_list:
-            futures.append(executor.submit(detection_process, camera, season))
-
-        # Wait for all processes to finish
+        futures = [executor.submit(detection_process, camera, season) for camera in camera_list]
         for future in futures:
-            future.result()  # This will raise exceptions if any occurred
+            future.result()
 
     fusion_thread.join()
-    
