@@ -22,20 +22,22 @@ def average_pose3d(pose_queue):
     queue_list = list(pose_queue.queue)
 
     for pose in queue_list:
-        total_x += pose.x
-        total_y += pose.y
-        total_z += pose.z
+        if isinstance(pose, Pose3D):
+            
+            total_x += pose.x
+            total_y += pose.y
+            total_z += pose.z
 
-        total_roll_sin += np.sin(pose.roll)
-        total_roll_cos += np.cos(pose.roll)
+            total_roll_sin += np.sin(pose.roll)
+            total_roll_cos += np.cos(pose.roll)
 
-        total_pitch_sin += np.sin(pose.pitch)
-        total_pitch_cos += np.cos(pose.pitch)
+            total_pitch_sin += np.sin(pose.pitch)
+            total_pitch_cos += np.cos(pose.pitch)
 
-        total_yaw_sin += np.sin(pose.yaw)
-        total_yaw_cos += np.cos(pose.yaw)
+            total_yaw_sin += np.sin(pose.yaw)
+            total_yaw_cos += np.cos(pose.yaw)
 
-        count += 1
+            count += 1
 
     if count == 0:
         return Pose3D()  # Return a default Pose3D if queue is empty
