@@ -1,17 +1,21 @@
-"""
-This function takes input in the "data_format"; see utils/data_formats.py
-This function updates the NetworkTables with this input.
-"""
-def update_robot_data(robot_data: dict):
-    # TODO: @NoamHSU
-    raise NotImplementedError("This function has not been implemented yet.")
+from ntcore import NetworkTableInstance
 
+from capture.camera import Pose3D
+class RobotPosePublisher:
+    def __init__(self, team_number: int):
+        # Initialize NetworkTables instance
+        self.ntinst = NetworkTableInstance.getDefault()
+        self.ntinst.startClient4("aurora_client")  # Connect to the FRC team's network
+        self.ntinst.setServerTeam(team_number)
 
-"""
-This function gets a camera list; see capture/camera.py
-It should update the camera streams on the network (camera.frame is already constantly updating in the back)
-"""
-def update_streams(cameras: list):
-    # TODO: @NoamHSU
-    raise NotImplementedError("This function has not been implemented yet.")
-    
+        # Get or create the "RobotPose" table
+        self.robot_pose_table = self.ntinst.getTable("Aurora/Localization")
+
+    def update_pose(self, pose: Pose3D):
+        # Publish values to the "RobotPose" table
+        self.robot_pose_table.putNumber("X", pose.x)
+        self.robot_pose_table.putNumber("Y", pose.y)
+        self.robot_pose_table.putNumber("Z", pose.z)
+        self.robot_pose_table.putNumber("Roll", pose.roll)
+        self.robot_pose_table.putNumber("Pitch", pose.pitch)
+        self.robot_pose_table.putNumber("Yaw", pose.yaw)

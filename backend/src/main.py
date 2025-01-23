@@ -1,3 +1,4 @@
+from networking.network_tables import RobotPosePublisher
 from capture.camera_manager import open_stream, open_all_cameras_and_process
 from flask import Flask, Response, send_from_directory, jsonify
 from detection.detection_process import run_detection
@@ -15,6 +16,7 @@ import cv2
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 data_lock = threading.Lock()
 output = {}
+client = RobotPosePublisher(team_number=6738)
 
 def data_fusion(cameras: List[Camera]):
     global output
@@ -27,6 +29,7 @@ def data_fusion(cameras: List[Camera]):
             avg_poses.put(average_pose3d(copy_queue))  # need to replace with weighted avg
 
         avg_pose = average_pose3d(avg_poses)
+        client.update_pose(avg_pose)
 
         with data_lock:
             output = data_format(cameras, {}, avg_pose)
@@ -61,7 +64,7 @@ def stream(camera_id):
     # Create a generator to stream frames
     def generate():
         while True:
-            # Get the latest frame from the camera (assuming the camera has a method like `get_frame()`)
+            # Get the latest frame from the camera (assuming the camera has a method like get_frame())
             frame = camera.frame  # You need to implement this method in the Camera class
             if frame is None:
                 break  # Stop if no frame is available
