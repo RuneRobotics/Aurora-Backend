@@ -1,0 +1,12 @@
+
+version: '3.8'
+services:
+  Aurora:
+    build:
+      context: .                # Use the current directory to build the Dockerfile
+    container_name: Aurora-back   # Custom name
+    volumes:
+      - ./code:/app           # Mount your local "code" directory into the container
+    working_dir: /app           # Set the working directory in the container
+    ports:
+      - "5800:5800"             # Map container port 5900 to local port 5900
