@@ -15,7 +15,7 @@ This guide will help you set up and run the Aurora app in a Docker container.
 1. **Clone the Repository**:
    - Clone this repository to your local machine:
      ```bash
-     git clone https://github.com/your-repo/aurora.git
+     git clone https://github.com/RuneRobotics/Aurora-Backend
      cd aurora
      ```
 
@@ -48,8 +48,8 @@ This guide will help you set up and run the Aurora app in a Docker container.
 
 
 5. **Access the App**:
-   - Your app should now be running at `http://localhost:5900` (or the port you've configured).
-   - Open your browser and visit `http://localhost:5900` to see the app in action.
+   - Your app should now be running at `http://localhost:5800` (or the port you've configured).
+   - Open your browser and visit `http://localhost:5800` to see the app in action.
 
 
 6. **Stop the Container**:
@@ -63,7 +63,7 @@ This guide will help you set up and run the Aurora app in a Docker container.
 
 
 ## Notes:
-- The `docker-compose.yml` file mounts your local `aurora` directory into the container, so any changes you make locally will immediately be reflected in the container.
+- The `docker-compose.yml` file mounts your local `/Aurora-Backend` directory into the container, so any changes you make locally will immediately be reflected in the container.
 - You can view logs or access the container at any time using `docker exec`.
 - For debugging, you can run commands like:
   ```bash
