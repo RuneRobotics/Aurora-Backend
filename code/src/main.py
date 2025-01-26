@@ -81,8 +81,9 @@ def stream(camera_id):
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    camera_1 = Camera(id=0)
-    camera_list = [camera_1]
+    camera_0 = Camera(id=0)
+    camera_1 = Camera(id=1)
+    camera_list = [camera_0]
     threading.Thread(target=open_all_cameras_and_process, args=(data_fusion, run_detection, camera_list, constants.REEFSCAPE), daemon=True).start()
 
     # Use Waitress to serve the Flask app (this replaces app.run)

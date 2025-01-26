@@ -6,5 +6,8 @@ services:
     volumes:
       - ./code:/app  # Mount your local "code" directory into the container
     working_dir: /app  # Set the working directory in the container
+    privileged: true
+    devices:
+      - "/dev/video0:/dev/video0"
     ports:
       - "5800:5800"  # Map container port 5800 to local port 5800
