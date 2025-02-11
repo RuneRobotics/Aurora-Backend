@@ -1,4 +1,3 @@
-from networking.network_tables import RobotPosePublisher
 from capture.camera_manager import open_stream, open_all_cameras_and_process
 from flask import Flask, Response, send_from_directory, jsonify
 from detection.detection_process import run_detection
@@ -12,29 +11,62 @@ from typing import List
 import threading
 import time
 import cv2
+import socket
+import struct
 
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 data_lock = threading.Lock()
 output = {}
-client = RobotPosePublisher(team_number=6738)
+HOST = "localhost"
+PORT = 5000
 
 def data_fusion(cameras: List[Camera]):
     global output
+    sock = None  # Initialize socket as None
+    last_socket_attempt = 0  # Track last connection attempt time
 
     while True:
-        avg_poses = Queue()
+        start_time = time.time()
 
+        # Compute avg_pose
+        avg_poses = Queue()
         for camera in cameras:
             copy_queue = camera.robot_pose_queue
-            avg_poses.put(average_pose3d(copy_queue))  # need to replace with weighted avg
+            avg_poses.put(average_pose3d(copy_queue))  # Replace with weighted avg if needed
 
         avg_pose = average_pose3d(avg_poses)
-        client.update_pose(avg_pose)
 
+        # Update JSON output (fast updates for the frontend)
         with data_lock:
             output = data_format(cameras, {}, avg_pose)
 
-        time.sleep(constants.UPDATE_INTERVAL)
+        # Attempt to send data if connected
+        if sock:
+            try:
+                data = struct.pack('!6f', avg_pose.x, avg_pose.y, avg_pose.z, avg_pose.roll, avg_pose.pitch, avg_pose.yaw)
+                sock.sendall(data)
+            except (socket.error, ConnectionResetError):
+                print("Lost connection to the server. Closing socket.")
+                sock.close()
+                sock = None  # Reset socket to trigger reconnection
+
+        # Handle reconnection attempts (every 3 seconds)
+        if sock is None and (time.time() - last_socket_attempt) > 3:
+            last_socket_attempt = time.time()  # Update attempt timestamp
+            try:
+                print("Attempting to connect to the server...")
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(0.05)  # Prevent long blocking
+                sock.connect((HOST, PORT))
+                print("Connected to the server.")
+            except (socket.error, ConnectionResetError):
+                print("Connection failed. Will retry in 3 seconds.")
+                sock = None  # Keep it None until successful
+
+        # Sleep only for the remaining update interval time
+        elapsed_time = time.time() - start_time
+        sleep_time = max(0, constants.UPDATE_INTERVAL - elapsed_time)
+        time.sleep(sleep_time)
 
 # Serve React static files
 @app.route("/")
