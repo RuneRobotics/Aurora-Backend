@@ -25,6 +25,32 @@ class Pose3D:
         self.pitch = pitch
         self.yaw = yaw
 
+    def equals(self, other: object) -> bool:
+        """
+        Checks if two Pose3D objects are equal.
+
+        Two Pose3D objects are considered equal if their position (x, y, z)
+        and orientation (roll, pitch, yaw) values are numerically close within
+        a small tolerance.
+
+        Args:
+            other (Pose3D): The other Pose3D instance to compare.
+
+        Returns:
+            bool: True if the poses are approximately equal, False otherwise.
+        """
+        if not isinstance(other, Pose3D):
+            return False
+        return (
+            np.isclose(self.x, other.x) and
+            np.isclose(self.y, other.y) and
+            np.isclose(self.z, other.z) and
+            np.isclose(self.roll, other.roll) and
+            np.isclose(self.pitch, other.pitch) and
+            np.isclose(self.yaw, other.yaw)
+        )
+
+
 
 class Camera:
     """
