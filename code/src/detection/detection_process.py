@@ -25,8 +25,8 @@ def run_detection(camera: Camera, season: int):
 
         apriltag_detector.get_camera_and_tags_data(frame=frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
     cap.release()
     cv2.destroyAllWindows()
