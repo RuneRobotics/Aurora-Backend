@@ -17,7 +17,7 @@ import struct
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 data_lock = threading.Lock()
 output = {}
-HOST = "localhost"
+HOST = "192.168.0.224"
 PORT = 5000
 
 def data_fusion(cameras: List[Camera]):
@@ -114,7 +114,6 @@ def stream(camera_id):
 
 if __name__ == '__main__':
     camera_0 = Camera(id=0)
-    camera_1 = Camera(id=1)
     camera_list = [camera_0]
     threading.Thread(target=open_all_cameras_and_process, args=(data_fusion, run_detection, camera_list, constants.REEFSCAPE), daemon=True).start()
 
