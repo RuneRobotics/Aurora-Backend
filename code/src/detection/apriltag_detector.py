@@ -94,6 +94,8 @@ class AprilTagDetector:
         robot_pose = self.camera.get_robot_pose()
         self.camera.add_pose_to_queue(robot_pose)
 
+        return robot_pose
+
     def __get_weighted_camera_pose(self, camera_positions: list) -> Pose3D | None:
         """
         Calculate the weighted average of camera poses based on tag scores.
