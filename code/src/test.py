@@ -1,5 +1,5 @@
 from detection.apriltag_detector import AprilTagDetector
-from capture.camera import Camera
+from capture.camera import Camera, Pose3D
 from utils import constants
 import cv2
 from pathlib import Path
@@ -27,4 +27,7 @@ else:
         print("Error: Image could not be loaded")
     else:
         pose = test_robot_pose(frame)
-        print(f"x: {pose.x}, y: {pose.y}, z: {pose.z}, roll: {pose.roll}, pitch: {pose.pitch}, yaw: {pose.yaw}")
+        if isinstance(pose, Pose3D):
+            print(pose.to_string())
+        else: 
+            print("Not Pose3D!")

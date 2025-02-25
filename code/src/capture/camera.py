@@ -41,15 +41,13 @@ class Pose3D:
         """
         if not isinstance(other, Pose3D):
             return False
-        return (
-            np.isclose(self.x, other.x) and
-            np.isclose(self.y, other.y) and
-            np.isclose(self.z, other.z) and
-            np.isclose(self.roll, other.roll) and
-            np.isclose(self.pitch, other.pitch) and
-            np.isclose(self.yaw, other.yaw)
+        return np.allclose(
+            [self.x, self.y, self.z, self.roll, self.pitch, self.yaw],
+            [other.x, other.y, other.z, other.roll, other.pitch, other.yaw]
         )
-
+    
+    def to_string(self):
+        return f"x: {self.x}, y: {self.y}, z: {self.z}, roll: {self.roll}, pitch: {self.pitch}, yaw: {self.yaw}"
 
 
 class Camera:
