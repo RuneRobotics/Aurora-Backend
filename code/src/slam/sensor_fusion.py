@@ -38,7 +38,6 @@ def average_pose3d(pose_queue):
                 total_yaw_cos += np.cos(pose.yaw)
 
                 count += 1
-            print(f"pose {count}: {pose.to_string()}")
     if count == 0:
         return Pose3D()  # Return a default Pose3D if queue is empty
 
@@ -59,7 +58,6 @@ def average_pose3d(pose_queue):
         yaw=avg_yaw
     )
 
-    print(f"avg pose: {avg_pose.to_string()}")
     return avg_pose
 
 

@@ -1,6 +1,6 @@
 from capture.camera_manager import open_stream, open_all_cameras_and_process
 from flask import Flask, Response, send_from_directory, jsonify
-from detection.detection_process import run_detection_test
+from detection.detection_process import run_detection
 from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
 from capture.camera import Camera
@@ -115,7 +115,7 @@ def stream(camera_id):
 if __name__ == '__main__':
     camera_0 = Camera(id=0)
     camera_list = [camera_0]
-    threading.Thread(target=open_all_cameras_and_process, args=(data_fusion, run_detection_test, camera_list, constants.REEFSCAPE), daemon=True).start()
+    threading.Thread(target=open_all_cameras_and_process, args=(data_fusion, run_detection, camera_list, constants.REEFSCAPE), daemon=True).start()
 
     # Use Waitress to serve the Flask app (this replaces app.run)
     serve(app, host='0.0.0.0', port=constants.DASHBOARD_PORT)
