@@ -66,7 +66,7 @@ def data_fusion(cameras: List[Camera]):
         # Sleep only for the remaining update interval time
         elapsed_time = time.time() - start_time
         sleep_time = max(0, constants.UPDATE_INTERVAL - elapsed_time)
-        time.sleep(sleep_time * 100)
+        time.sleep(sleep_time)
 
 # Serve React static files
 @app.route("/")

@@ -1,44 +1,67 @@
-from pathlib import Path
-import numpy as np
 import cv2
+import numpy as np
+import os
 
-def calibrate_camera(image_folder: Path, chessboard_size: tuple[int, int] = (9, 6), square_size: float = 1.0) -> tuple[float, np.ndarray, np.ndarray]:
-    """
-    Calibrate a camera using images of a chessboard.
+# === Configuration ===
+CHESSBOARD_SIZE = (7, 7)
+SQUARE_SIZE = 0.28/8
+NUM_IMAGES = 20
+SAVE_IMAGES = False
+SAVE_DIR = "calib_images"
+CAMERA_ID = 0
 
-    Args:
-        image_folder (Path): Path to the folder containing chessboard images.
-        chessboard_size (tuple[int, int]): Number of inner corners per chessboard row and column (rows, columns).
-        square_size (float): Size of a square on the chessboard in your desired units (e.g., meters, centimeters).
+# === Prepare object points ===
+objp = np.zeros((CHESSBOARD_SIZE[0] * CHESSBOARD_SIZE[1], 3), np.float32)
+objp[:, :2] = np.mgrid[0:CHESSBOARD_SIZE[0], 0:CHESSBOARD_SIZE[1]].T.reshape(-1, 2)
+objp *= SQUARE_SIZE
 
-    Returns:
-        tuple[float, np.ndarray, np.ndarray, list[np.ndarray], list[np.ndarray]]:
-            - ret (float): Overall RMS re-projection error.
-            - camera_matrix (numpy.ndarray): Camera matrix.
-            - dist_coeffs (numpy.ndarray): Distortion coefficients.
-    """
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
-    objp *= square_size
+objpoints = []
+imgpoints = []
 
-    objpoints = []
-    imgpoints = []
+cap = cv2.VideoCapture(CAMERA_ID)
+collected = 0
 
-    images = list(image_folder.glob("*.png")) + list(image_folder.glob("*.jpg")) + list(image_folder.glob("*.jpeg"))
+if SAVE_IMAGES and not os.path.exists(SAVE_DIR):
+    os.makedirs(SAVE_DIR)
 
-    for img_path in images:
-        img = cv2.imread(str(img_path))
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        ret, corners = cv2.findChessboardCorners(gray, chessboard_size, None)
+print("Press SPACE to capture a frame if chessboard is detected. Press ESC to quit.")
 
-        if ret:
-            objpoints.append(objp)
-            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            imgpoints.append(corners2)
+while collected < NUM_IMAGES:
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-    ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(
-        objpoints, imgpoints, gray.shape[::-1], None, None
-    )
+    display_frame = frame.copy()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    found, corners = cv2.findChessboardCorners(gray, CHESSBOARD_SIZE, None)
 
-    return ret, camera_matrix, dist_coeffs
+    if found:
+        cv2.drawChessboardCorners(display_frame, CHESSBOARD_SIZE, corners, found)
+
+    cv2.imshow("Calibration Feedback", display_frame)
+    key = cv2.waitKey(1)
+
+    if key == 27:  # ESC
+        break
+    elif key == 32 and found:  # SPACE
+        corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1),
+                                    criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001))
+        objpoints.append(objp)
+        imgpoints.append(corners2)
+        collected += 1
+        print(f"Captured image {collected}/{NUM_IMAGES}")
+
+        if SAVE_IMAGES:
+            cv2.imwrite(f"{SAVE_DIR}/img_{collected}.png", frame)
+
+cap.release()
+cv2.destroyAllWindows()
+
+# === Calibration ===
+ret, matrix, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+
+print("\n=== Calibration Results ===")
+print("Camera Matrix:\n", matrix)
+print("Distortion Coefficients:\n", dist)
+
+np.savez("camera_calibration.npz", matrix=matrix, dist=dist)
