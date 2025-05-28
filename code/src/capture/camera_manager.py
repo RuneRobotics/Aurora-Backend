@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-from globals import CURRENT_MODE, MODE_LOCK
+from globals import CURRENT_MODE, MODE_LOCK, SETTINGS_LOCK
 from threading import Thread
 import cv2
 
@@ -46,8 +46,7 @@ def open_threads(data_fusion, camera_list, season):
                 target_id = CURRENT_MODE["camera_id"]
 
             if mode == "detection":
-                camera.run_stream()
-                #camera.run_detection()
+                camera.run_detection()
 
             elif mode in {"calibration", "lighting", "settings"}:
                 if camera.id == target_id:
@@ -68,5 +67,6 @@ def select_mode(camera, mode):
     elif mode == "lighting":
         camera.run_lighting()
     elif mode == "settings":
+        #with SETTINGS_LOCK:
         camera.run_settings()
 

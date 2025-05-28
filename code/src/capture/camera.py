@@ -99,6 +99,13 @@ class Camera:
         pass
     
     def run_settings(self):
+        GLOBAL_FLAG = True
+        if GLOBAL_FLAG:
+            #change stuff
+            GLOBAL_FLAG = False
+
+        # change the settings file for this camera, and change this instance of the camera
+        # the change happnes only if a global flag is turned on - meaning there was a change, and then we change it to false
         pass
 
     def run_lighting(self):
