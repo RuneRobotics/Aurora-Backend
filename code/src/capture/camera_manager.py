@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-from capture.camera import Camera
+from globals import CURRENT_MODE, MODE_LOCK
 from threading import Thread
 import cv2
 
@@ -21,27 +21,51 @@ def open_stream(input_source: str | int) -> cv2.VideoCapture | None:
     return cap
 
 
-def open_all_cameras_and_process(
-    data_fusion: callable, 
-    detection_process: callable, 
-    camera_list: list[Camera], 
-    season: int
-) -> None:
-    """
-    Open all cameras and process data using fusion and detection processes.
-
-    Args:
-        data_fusion (callable): Function to perform data fusion.
-        detection_process (callable): Function to perform detection for each camera.
-        camera_list (list[Camera]): List of Camera objects to process.
-        season (int): Identifier for the current season.
-    """
+def open_threads(data_fusion, camera_list, season):
     fusion_thread = Thread(target=data_fusion, args=(camera_list,))
     fusion_thread.start()
 
+    def camera_worker(camera):
+
+        cap = open_stream(camera.id)
+        if cap is None:
+            # log that?
+            return
+        
+        while True:
+
+            ret, frame = cap.read()
+            camera.frame = frame
+
+            if not ret:
+                #logging.error(f"Error: Failed to capture image from camera {camera.id}.")
+                continue
+
+            with MODE_LOCK:
+                mode = CURRENT_MODE["mode"]
+                target_id = CURRENT_MODE["camera_id"]
+
+            if mode == "detection":
+                camera.run_detection()
+
+            elif mode in {"calibration", "lighting", "settings"}:
+                if camera.id == target_id:
+                    select_mode(camera, mode)
+                else:
+                    camera.run_stream()
+            else:
+                camera.run_stream()
+
     with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(detection_process, camera, season) for camera in camera_list]
-        for future in futures:
-            future.result()
+        executor.map(camera_worker, camera_list)
 
     fusion_thread.join()
+
+def select_mode(camera, mode):
+    if mode == "calibration":
+        camera.run_calibration()
+    elif mode == "lighting":
+        camera.run_lighting()
+    elif mode == "settings":
+        camera.run_settings()
+

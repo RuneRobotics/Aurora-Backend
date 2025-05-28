@@ -1,6 +1,6 @@
 import numpy as np
 from math import radians, degrees, pi
-from capture.camera import Pose3D
+from utils.pose3d import Pose3D
 
 class KalmanFilter:
     def __init__(self, process_noise=0.01, measurement_noise=0.1, num_cameras=1):

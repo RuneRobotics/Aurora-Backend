@@ -2,53 +2,10 @@ from scipy.spatial.transform import Rotation as R
 from utils import constants
 from queue import Queue
 import numpy as np
-
-
-class Pose3D:
-    """
-    Represents a 3D pose with position and orientation.
-
-    Attributes:
-        x (float): X-coordinate of the pose.
-        y (float): Y-coordinate of the pose.
-        z (float): Z-coordinate of the pose.
-        roll (float): Rotation around the X-axis in radians.
-        pitch (float): Rotation around the Y-axis in radians.
-        yaw (float): Rotation around the Z-axis in radians.
-    """
-
-    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0, roll: float = 0.0, pitch: float = 0.0, yaw: float = 0.0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.roll = roll
-        self.pitch = pitch
-        self.yaw = yaw
-
-    def equals(self, other: object) -> bool:
-        """
-        Checks if two Pose3D objects are equal.
-
-        Two Pose3D objects are considered equal if their position (x, y, z)
-        and orientation (roll, pitch, yaw) values are numerically close within
-        a small tolerance.
-
-        Args:
-            other (Pose3D): The other Pose3D instance to compare.
-
-        Returns:
-            bool: True if the poses are approximately equal, False otherwise.
-        """
-        if not isinstance(other, Pose3D):
-            return False
-        return np.allclose(
-            [self.x, self.y, self.z, self.roll, self.pitch, self.yaw],
-            [other.x, other.y, other.z, other.roll, other.pitch, other.yaw]
-        )
-    
-    def to_string(self):
-        return f"x: {self.x}, y: {self.y}, z: {self.z}, roll: {self.roll}, pitch: {self.pitch}, yaw: {self.yaw}"
-
+from utils.pose3d import Pose3D
+from detection.apriltag_detector import AprilTagDetector
+from capture.calibration_utils import run_directory_calibration
+import os
 
 class Camera:
     """
@@ -78,6 +35,8 @@ class Camera:
         self.matrix = matrix
         self.dist_coeffs = dist_coeffs
         self.frame: np.ndarray | None = None
+        self.season = 2025
+        self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=self.season)
 
     def get_robot_pose(self) -> Pose3D | None:
         """
@@ -129,3 +88,34 @@ class Camera:
         if self.robot_pose_queue.full():
             _ = self.robot_pose_queue.get()
         self.robot_pose_queue.put(pose)
+
+    def run_detection(self):
+        detected_apriltags, camera_position = self.apriltag_detector.get_detection_data(frame=self.frame)
+        self.detected_apriltags = detected_apriltags
+        self.field_pose = camera_position
+        self.add_pose_to_queue(self.get_robot_pose())
+
+
+    def run_stream(self):
+        pass
+    
+    def run_settings(self):
+        pass
+
+    def run_lighting(self):
+        pass
+
+    def run_calibration(self):
+        calib_dir = os.path.join("src", "capture", "calibration_data", f"camera_{self.id}", "settings233")
+
+        if not os.path.exists(calib_dir):
+            raise FileNotFoundError(f"Calibration directory {calib_dir} does not exist")
+
+        result = run_directory_calibration(calib_dir)
+
+        # Optionally, store calibration results in camera instance
+        self.intrinsic_matrix = np.array(result["matrix"])
+        self.distortion_coeffs = np.array(result["distortion"])
+
+        print(f"Camera {self.id} calibration successful using {result['num_images']} images.")
+        return result

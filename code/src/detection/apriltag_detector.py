@@ -1,5 +1,5 @@
 from scipy.spatial.transform import Rotation as R
-from capture.camera import Camera, Pose3D
+from utils.pose3d import Pose3D
 from utils.json_utils import load_field
 import pyapriltags as apriltag
 from utils import constants
@@ -19,7 +19,7 @@ class AprilTagDetector:
         dist_coeffs (np.ndarray): Camera distortion coefficients.
     """
 
-    def __init__(self, season: int, camera: Camera, families: str = 'tag36h11'):
+    def __init__(self, season: int, matrix, dist_coeffs, families: str = 'tag36h11'):
         """
         Initialize the AprilTag detector.
 
@@ -29,9 +29,8 @@ class AprilTagDetector:
             families (str): AprilTag families to detect (default: 'tag36h11').
         """
         self.__detector = apriltag.Detector(families=families)
-        self.camera = camera
-        self.camera_matrix = camera.matrix
-        self.dist_coeffs = camera.dist_coeffs
+        self.camera_matrix = matrix
+        self.dist_coeffs = dist_coeffs
         self.field_data = load_field(season)
 
     def __detect(self, frame: np.ndarray) -> list:
@@ -47,7 +46,7 @@ class AprilTagDetector:
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return self.__detector.detect(gray_frame)
 
-    def get_camera_and_tags_data(self, frame: np.ndarray) -> None:
+    def get_detection_data(self, frame: np.ndarray) -> None:
         """
         Process a frame to detect tags and compute camera pose.
 
@@ -89,12 +88,8 @@ class AprilTagDetector:
             camera_poses.append((camera_position, euler_angles, 1))  # Score placeholder: 1
 
         camera_position = self.__get_weighted_camera_pose(camera_poses)
-        self.camera.detected_apriltags = detected_apriltags
-        self.camera.field_pose = camera_position
-        robot_pose = self.camera.get_robot_pose()
-        self.camera.add_pose_to_queue(robot_pose)
 
-        return robot_pose
+        return detected_apriltags, camera_position
 
     def __get_weighted_camera_pose(self, camera_positions: list) -> Pose3D | None:
         """
