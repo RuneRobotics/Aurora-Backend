@@ -95,7 +95,6 @@ class Camera:
         self.field_pose = camera_position
         self.add_pose_to_queue(self.get_robot_pose())
 
-
     def run_stream(self):
         pass
     
@@ -106,16 +105,4 @@ class Camera:
         pass
 
     def run_calibration(self):
-        calib_dir = os.path.join("src", "capture", "calibration_data", f"camera_{self.id}", "settings233")
-
-        if not os.path.exists(calib_dir):
-            raise FileNotFoundError(f"Calibration directory {calib_dir} does not exist")
-
-        result = run_directory_calibration(calib_dir)
-
-        # Optionally, store calibration results in camera instance
-        self.intrinsic_matrix = np.array(result["matrix"])
-        self.distortion_coeffs = np.array(result["distortion"])
-
-        print(f"Camera {self.id} calibration successful using {result['num_images']} images.")
-        return result
+        pass

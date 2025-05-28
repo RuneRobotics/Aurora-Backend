@@ -46,7 +46,8 @@ def open_threads(data_fusion, camera_list, season):
                 target_id = CURRENT_MODE["camera_id"]
 
             if mode == "detection":
-                camera.run_detection()
+                camera.run_stream()
+                #camera.run_detection()
 
             elif mode in {"calibration", "lighting", "settings"}:
                 if camera.id == target_id:
