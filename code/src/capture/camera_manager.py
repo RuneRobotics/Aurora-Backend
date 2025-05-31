@@ -44,11 +44,12 @@ def open_threads(data_fusion, camera_list, season):
             with MODE_LOCK:
                 mode = CURRENT_MODE["mode"]
                 target_id = CURRENT_MODE["camera_id"]
+                print(mode, target_id)
 
-            if mode == "detection":
+            if mode == "Detection":
                 camera.run_detection()
 
-            elif mode in {"calibration", "lighting", "settings"}:
+            elif mode in {"Calibration", "Lighting", "Settings"}:
                 if camera.id == target_id:
                     select_mode(camera, mode)
                 else:
@@ -62,11 +63,11 @@ def open_threads(data_fusion, camera_list, season):
     fusion_thread.join()
 
 def select_mode(camera, mode):
-    if mode == "calibration":
+    if mode == "Calibration":
         camera.run_calibration()
-    elif mode == "lighting":
+    elif mode == "Lighting":
         camera.run_lighting()
-    elif mode == "settings":
+    elif mode == "Settings":
         #with SETTINGS_LOCK:
         camera.run_settings()
 

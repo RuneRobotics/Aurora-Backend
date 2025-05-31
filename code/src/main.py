@@ -5,6 +5,7 @@ import threading
 import time
 import cv2
 import os
+import json
 import socket
 import struct
 from capture.camera_manager import open_threads
@@ -12,8 +13,7 @@ from capture.camera import Camera
 from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
 from utils import constants
-from capture.calibration_utils import run_directory_calibration
-from globals import CURRENT_MODE, MODE_LOCK
+from globals import CURRENT_MODE, MODE_LOCK, SETTINGS_LOCK, CAMERA_SETTINGS
 
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 
@@ -36,6 +36,21 @@ def get_data():
     with data_lock:
         return jsonify(output)
 
+@app.route("/api/device", methods=["GET"])
+def get_device_data():
+    with data_lock:
+
+        tmp = {
+            "cameras": output["cameras"],
+            "ip": "0.0.0.0 this is a dummy ip"
+        }
+        return jsonify(output)
+
+@app.route("/api/detection", methods=["GET"])
+def get_fused_detection():
+    with data_lock:
+        return jsonify(output["fused_data"])
+
 @app.route("/api/mode", methods=["GET"])
 def get_mode():
     with MODE_LOCK:
@@ -47,7 +62,7 @@ def set_mode():
     mode = mode_data.get("mode")
     camera_id = mode_data.get("camera_id", None)
 
-    if mode not in {"detection", "calibration", "lighting", "settings"}:
+    if mode not in {"Detection", "Calibration", "Lighting", "Settings"}:
         return jsonify({"error": "Invalid mode"}), 400
 
     with MODE_LOCK:
@@ -56,6 +71,69 @@ def set_mode():
 
     return jsonify({"status": "ok", "mode": mode, "camera_id": camera_id})
 
+@app.route('/api/settings_<int:camera_id>', methods=['GET'])
+def get_camera_settings(camera_id):
+    try:
+        # Calculate absolute path
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # e.g., /path/to/src
+        json_path = os.path.join(base_dir, 'capture', 'cameras_settings.json')
+        
+        with open(json_path) as f:
+            camera_settings = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"error": "Settings file not found"}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Settings file is not valid JSON"}), 500
+
+    if 0 <= camera_id < len(camera_settings):
+        return jsonify(camera_settings[camera_id])
+    else:
+        return jsonify({"error": "Invalid camera ID"}), 404
+
+@app.route('/api/settings_<int:camera_id>', methods=['POST'])
+def set_camera_settings(camera_id):
+    new_settings = request.get_json()
+    if not new_settings:
+        return jsonify({"error": "Missing settings data"}), 400
+
+    # Validate required keys (example, expand as needed!)
+    required_keys = {"fps", "name", "pitch", "roll", "x", "y", "yaw", "z"}
+    if not required_keys.issubset(new_settings):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Thread-safe update
+    with SETTINGS_LOCK:
+        try:
+            # Determine absolute path to JSON file
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            json_path = os.path.join(base_dir, 'capture', 'cameras_settings.json')
+
+            # Load current settings
+            with open(json_path, 'r') as f:
+                camera_settings = json.load(f)
+
+            # Check if camera_id is valid
+            if 0 <= camera_id < len(camera_settings):
+                # Update
+                camera_settings[camera_id] = new_settings
+
+                # Write back to file
+                with open(json_path, 'w') as f:
+                    json.dump(camera_settings, f, indent=4)
+
+                # Optional: update global CAMERA_SETTINGS if needed
+                global CAMERA_SETTINGS
+                CAMERA_SETTINGS = camera_settings
+
+                return jsonify({"status": "ok", "camera_id": camera_id, "updated_settings": new_settings})
+            else:
+                return jsonify({"error": "Invalid camera ID"}), 404
+
+        except FileNotFoundError:
+            return jsonify({"error": "Settings file not found"}), 404
+        except json.JSONDecodeError:
+            return jsonify({"error": "Settings file is not valid JSON"}), 500
+        
 @app.route("/api/stream_<int:camera_id>")
 def stream(camera_id):
     camera = next((cam for cam in camera_list if cam.id == camera_id), None)
@@ -75,12 +153,15 @@ def stream(camera_id):
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 def start_system():
     global camera_list
-    camera_0 = Camera(id=0)
+    camera_2 = Camera(id=2)
     camera_1 = Camera(id=1)
-    camera_list = [camera_0, camera_1]
+    camera_0 = Camera(id=0)
+    camera_list = []
+    camera_list.append(camera_0)
+    camera_list.append(camera_1)
+    #camera_list.append(camera_2)
     threading.Thread(
         target=open_threads,
         args=(data_fusion, camera_list, constants.REEFSCAPE),
