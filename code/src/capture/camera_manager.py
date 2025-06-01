@@ -71,3 +71,14 @@ def select_mode(camera, mode):
         #with SETTINGS_LOCK:
         camera.run_settings()
 
+def count_connected_cameras(max_cameras=25):
+    count = 0
+    for i in range(max_cameras):
+        cap = cv2.VideoCapture(i)
+        if cap is None or not cap.isOpened():
+            cap.release()
+            # Stop as soon as an index is out-of-bounds
+            break
+        count += 1
+        cap.release()
+    return count

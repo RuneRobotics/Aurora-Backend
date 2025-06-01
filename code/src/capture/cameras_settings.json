@@ -1,22 +1,2 @@
 [
-    {
-        "fps": 60,
-        "name": "bobobobobo",
-        "pitch": 0,
-        "roll": 0,
-        "x": 0,
-        "y": 0,
-        "yaw": 0,
-        "z": 0
-    },
-    {
-        "fps": 60,
-        "name": "not a real camera",
-        "pitch": 0,
-        "roll": 0,
-        "x": 0,
-        "y": 0,
-        "yaw": 0,
-        "z": 0
-    }
 ]

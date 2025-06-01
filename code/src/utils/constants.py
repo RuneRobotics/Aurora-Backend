@@ -15,3 +15,18 @@ DASHBOARD_PORT = 5800
 QUEUE_SIZE = 15
 TAG_HALF_SIZE = 0.5 * ((6.5 * 2.54) / 100)
 UPDATE_INTERVAL = 0.015
+
+DEFAULT_CAMERA = {
+                    "settings": {
+                        "fps": 60,
+                        "name": "Default Camera",
+                        "pitch": 0,
+                        "roll": 0,
+                        "x": 0,
+                        "y": 0,
+                        "yaw": 0,
+                        "z": 0
+                    },
+                    "lighting": {},
+                    "calibration": {}
+                }

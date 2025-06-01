@@ -6,6 +6,8 @@ from utils.pose3d import Pose3D
 from detection.apriltag_detector import AprilTagDetector
 from capture.calibration_utils import run_directory_calibration
 import os
+from globals import SEASON
+import json
 
 class Camera:
     """
@@ -22,21 +24,57 @@ class Camera:
 
     def __init__(
         self,
-        id: int,
-        pose_on_robot: Pose3D = Pose3D(),
-        matrix: np.ndarray = np.array([[600, 0, 320], [0, 600, 240], [0, 0, 1]], dtype=np.float32),
-        dist_coeffs: np.ndarray = np.zeros((4, 1))
+        id: int
     ):
-        self.robot_pose_queue: Queue[Pose3D] = Queue(maxsize=constants.QUEUE_SIZE)
-        self.detected_apriltags: list = []
+        
         self.id = id
-        self.pose_on_robot = pose_on_robot
+
+        self.pose_on_robot = Pose3D()
         self.field_pose: Pose3D | None = None
-        self.matrix = matrix
-        self.dist_coeffs = dist_coeffs
+
+        self.matrix = np.array([[600, 0, 320], [0, 600, 240], [0, 0, 1]], dtype=np.float32)
+        self.dist_coeffs = np.zeros((4, 1))
+        self.robot_pose_queue: Queue[Pose3D] = Queue(maxsize=constants.QUEUE_SIZE)
+
+        self.apriltag_detector = None
         self.frame: np.ndarray | None = None
-        self.season = 2025
-        self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=self.season)
+        self.detected_apriltags: list = []
+        
+        self.__update_camera()
+
+    def __update_camera(self):
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(base_dir, 'cameras_settings.json')
+        with open(json_path) as f:
+            cameras_settings = json.load(f)
+
+        camera_dict = cameras_settings[self.id]
+
+        self.settings = camera_dict["settings"]
+        self.lighting = camera_dict["lighting"]
+        self.calibration = camera_dict["calibration"]
+
+        try:
+            self.pose_on_robot = Pose3D(
+                x=self.settings["x"],
+                y=self.settings["y"],
+                z=self.settings["z"],
+                roll=self.settings["roll"],
+                pitch=self.settings["pitch"],
+                yaw=self.settings["yaw"]
+            )
+        except Exception:
+            # settings error for camera
+            pass
+        try:
+            self.matrix = self.calibration["matrix"]
+            self.dist_coeffs = self.calibration["dist_coeffs"]
+        except Exception:
+            # calibration error for camera
+            pass
+
+        self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=SEASON)
 
     def get_robot_pose(self) -> Pose3D | None:
         """
@@ -106,7 +144,7 @@ class Camera:
 
         # change the settings file for this camera, and change this instance of the camera
         # the change happnes only if a global flag is turned on - meaning there was a change, and then we change it to false
-        pass
+        self.__update_camera()
 
     def run_lighting(self):
         pass
