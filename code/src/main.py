@@ -47,7 +47,7 @@ def validate_camera_id(camera_id, settings):
 
 def stream_generator(camera):
     while True:
-        frame = camera.frame
+        frame = camera.display_frame
         if frame is None:
             break
         ret, jpeg = cv2.imencode('.jpg', frame)

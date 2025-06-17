@@ -38,6 +38,7 @@ class Camera:
 
         self.apriltag_detector = None
         self.frame: np.ndarray | None = None
+        self.display_frame: np.ndarray | None = None
         self.detected_apriltags: list = []
         
         self.__update_camera()
@@ -128,7 +129,7 @@ class Camera:
         self.robot_pose_queue.put(pose)
 
     def run_detection(self):
-        detected_apriltags, camera_position = self.apriltag_detector.get_detection_data(frame=self.frame)
+        detected_apriltags, camera_position = self.apriltag_detector.get_detection_data(frame=self.display_frame)
         self.detected_apriltags = detected_apriltags
         self.field_pose = camera_position
         self.add_pose_to_queue(self.get_robot_pose())
@@ -153,10 +154,10 @@ class Camera:
         rows = self.calibration["rows"] - 1
         columns = self.calibration["columns"] - 1
         chessboard_size = (columns, rows)
-        gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(self.display_frame, cv2.COLOR_BGR2GRAY)
         found, corners = cv2.findChessboardCorners(gray, chessboard_size, None)
         if found:
-            cv2.drawChessboardCorners(self.frame, chessboard_size, corners, found)
+            cv2.drawChessboardCorners(self.display_frame, chessboard_size, corners, found)
 
         try:
 

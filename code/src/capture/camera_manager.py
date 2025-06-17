@@ -36,6 +36,7 @@ def open_threads(data_fusion, camera_list, season):
 
             ret, frame = cap.read()
             camera.frame = frame
+            camera.display_frame = frame.copy()
 
             if not ret:
                 #logging.error(f"Error: Failed to capture image from camera {camera.id}.")
@@ -67,7 +68,6 @@ def select_mode(camera, mode):
     elif mode == "Lighting":
         camera.run_lighting()
     elif mode == "Settings":
-        #with SETTINGS_LOCK:
         camera.run_settings()
 
 def count_connected_cameras(max_cameras=25):
