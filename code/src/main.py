@@ -249,20 +249,28 @@ def handle_calibration_operation():
         camera_id = globals.CURRENT_MODE["camera_id"]
 
     frame = camera_list[camera_id].frame
+    display_frame = camera_list[camera_id].display_frame
 
     if operation == "Delete":
         index = request.get_json().get("index")
-        delete_image(index)
+        delete_image(index, "calibration_images")
+        delete_image(index, "display_images")
         return jsonify({"status": "ok"})
 
     if operation == "Snapshot":
-        index = save_image(frame)
+        index = save_image(frame, "calibration_images")
+        _ = save_image(display_frame, 'display_images')
         return jsonify({"status": "ok", "index": index})
 
-    if operation == "Calibrate":
+    if operation == "Calibration":
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'capture', 'calibration_images')
         calibration_settings = camera_list[camera_id].calibration
-        calibrate_camera(image_dir=dir_path, calibration_settings=calibration_settings)
+        result = calibrate_camera(image_dir=dir_path, calibration_settings=calibration_settings)
+        num_files = len([f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))])
+        for i in range (0, num_files):
+            delete_image(0, "calibration_images")
+            delete_image(0, "display_images")
+        print("result:", result)
         return jsonify({"status": "ok"})
     
     return jsonify({"error": "Invalid Operation"}), 404
@@ -276,7 +284,7 @@ def get_calibration_amount():
 
 @app.route('/api/calibration/snapshot_<int:index>')
 def serve_calibration_image(index):
-    image_dir = Path(__file__).resolve().parent / 'capture' / 'calibration_images'
+    image_dir = Path(__file__).resolve().parent / 'capture' / 'display_images'
     file_path = image_dir / f'image_{index}.png'
 
     if not file_path.exists():
