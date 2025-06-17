@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-from globals import CURRENT_MODE, MODE_LOCK, SETTINGS_LOCK
+import globals
 from threading import Thread
 import cv2
 
@@ -41,10 +41,9 @@ def open_threads(data_fusion, camera_list, season):
                 #logging.error(f"Error: Failed to capture image from camera {camera.id}.")
                 continue
 
-            with MODE_LOCK:
-                mode = CURRENT_MODE["mode"]
-                target_id = CURRENT_MODE["camera_id"]
-                print(mode, target_id)
+            with globals.MODE_LOCK:
+                mode = globals.CURRENT_MODE["mode"]
+                target_id = globals.CURRENT_MODE["camera_id"]
 
             if mode == "Detection":
                 camera.run_detection()

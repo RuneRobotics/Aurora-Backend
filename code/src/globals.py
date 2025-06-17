@@ -1,11 +1,15 @@
 import threading
 from utils import constants
 
+MODE_LOCK = threading.Lock()
 CURRENT_MODE = {
     "mode": "Detection",   # default
     "camera_id": -1
 }
-MODE_LOCK = threading.Lock()
+
+SETTINGS_LOCK = threading.Lock()
+
+CALIBRATION_SETTINGS = constants.DEFAULT_CALIBRATION
 
 CAMERA_SETTINGS = {
     "fps": 60,
@@ -18,8 +22,6 @@ CAMERA_SETTINGS = {
     "z": 0
 }
 
-NEW_SETTINGS_SAVED = False
-
-SETTINGS_LOCK = threading.Lock()
+SETTINGS_CHANGED = False
 
 SEASON = constants.REEFSCAPE

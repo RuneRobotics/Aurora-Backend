@@ -30,3 +30,13 @@ DEFAULT_CAMERA = {
                     "lighting": {},
                     "calibration": {}
                 }
+
+DEFAULT_CALIBRATION = {
+                        "columns": -1,
+                        "imageSize": {
+                            "height": 480,
+                            "width": 640
+                        },
+                        "rows": -1,
+                        "sideLength": -1
+                    }

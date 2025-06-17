@@ -4,10 +4,10 @@ from queue import Queue
 import numpy as np
 from utils.pose3d import Pose3D
 from detection.apriltag_detector import AprilTagDetector
-from capture.calibration_utils import run_directory_calibration
 import os
-from globals import SEASON
+import globals
 import json
+import cv2
 
 class Camera:
     """
@@ -74,7 +74,7 @@ class Camera:
             # calibration error for camera
             pass
 
-        self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=SEASON)
+        self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=constants.REEFSCAPE)
 
     def get_robot_pose(self) -> Pose3D | None:
         """
@@ -137,17 +137,33 @@ class Camera:
         pass
     
     def run_settings(self):
-        GLOBAL_FLAG = True
-        if GLOBAL_FLAG:
-            #change stuff
-            GLOBAL_FLAG = False
-
-        # change the settings file for this camera, and change this instance of the camera
-        # the change happnes only if a global flag is turned on - meaning there was a change, and then we change it to false
-        self.__update_camera()
+        try:
+            with globals.SETTINGS_LOCK:
+                if globals.SETTINGS_CHANGED == True:
+                    self.__update_camera()
+                    globals.SETTINGS_CHANGED = False
+                    print("settings changed!")
+        except Exception as e:
+            print(e)
 
     def run_lighting(self):
         pass
 
     def run_calibration(self):
-        pass
+        rows = self.calibration["rows"] - 1
+        columns = self.calibration["columns"] - 1
+        chessboard_size = (columns, rows)
+        gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        found, corners = cv2.findChessboardCorners(gray, chessboard_size, None)
+        if found:
+            cv2.drawChessboardCorners(self.frame, chessboard_size, corners, found)
+
+        try:
+
+            with globals.SETTINGS_LOCK:
+                if globals.SETTINGS_CHANGED == True:
+                    self.__update_camera()
+                    globals.SETTINGS_CHANGED = False
+                    print("calibration changed!")
+        except Exception as e:
+            print(e)

@@ -1,20 +1,22 @@
-from flask import Flask, Response, send_from_directory, jsonify, request
+from flask import Flask, Response, send_from_directory, jsonify, request, send_file
 from waitress import serve
 from queue import Queue
 import threading
 import time
 import cv2
 import os
+from pathlib import Path
 import json
 import socket
 import struct
 
 from capture.camera_manager import open_threads, count_connected_cameras
 from capture.camera import Camera
+from capture.camera_calibration import calibrate_camera, delete_image, save_image
 from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
 from utils import constants
-from globals import CURRENT_MODE, MODE_LOCK, SETTINGS_LOCK, CAMERA_SETTINGS
+import globals
 
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 
@@ -157,8 +159,8 @@ def get_fused_detection():
 @app.route("/api/mode", methods=["GET", "POST"])
 def handle_mode():
     if request.method == "GET":
-        with MODE_LOCK:
-            return jsonify(CURRENT_MODE)
+        with globals.MODE_LOCK:
+            return jsonify(globals.CURRENT_MODE)
 
     mode_data = request.get_json()
     mode = mode_data.get("mode")
@@ -167,9 +169,9 @@ def handle_mode():
     if mode not in {"Detection", "Calibration", "Lighting", "Settings"}:
         return jsonify({"error": "Invalid mode"}), 400
 
-    with MODE_LOCK:
-        CURRENT_MODE["mode"] = mode
-        CURRENT_MODE["camera_id"] = camera_id
+    with globals.MODE_LOCK:
+        globals.CURRENT_MODE["mode"] = mode
+        globals.CURRENT_MODE["camera_id"] = camera_id
 
     return jsonify({"status": "ok", "mode": mode, "camera_id": camera_id})
 
@@ -191,13 +193,40 @@ def handle_camera_settings(camera_id):
     if not required_keys.issubset(new_settings):
         return jsonify({"error": "Missing required fields"}), 400
 
-    with SETTINGS_LOCK:
+    with globals.SETTINGS_LOCK:
         if validate_camera_id(camera_id, camera_settings):
             camera_settings[camera_id]["settings"] = new_settings
             save_camera_settings(camera_settings, json_path)
-            global CAMERA_SETTINGS
-            CAMERA_SETTINGS = camera_settings
+            globals.SETTINGS_CHANGED = True
             return jsonify({"status": "ok", "camera_id": camera_id, "updated_settings": new_settings})
+
+        return jsonify({"error": "Invalid camera ID"}), 404
+
+
+@app.route('/api/calibration_settings', methods=['GET', 'POST'])
+def handle_calibration_settings():
+    camera_settings, json_path = load_camera_settings()
+
+    with globals.MODE_LOCK:
+        camera_id = globals.CURRENT_MODE["camera_id"]
+
+    if request.method == "GET":
+            return jsonify(camera_settings[camera_id]["calibration"])
+
+    new_calibration = request.get_json()
+    if not new_calibration:
+        return jsonify({"error": "Missing calibration data"}), 400
+
+    required_keys = {'rows', 'columns', 'sideLength', 'imageSize'}
+    if not required_keys.issubset(new_calibration):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    with globals.SETTINGS_LOCK:
+        if validate_camera_id(camera_id, camera_settings):
+            camera_settings[camera_id]["calibration"] = new_calibration
+            save_camera_settings(camera_settings, json_path)
+            globals.SETTINGS_CHANGED = True
+            return jsonify({"status": "ok", "camera_id": camera_id, "updated_calibration_settings": new_calibration})
 
         return jsonify({"error": "Invalid camera ID"}), 404
 
@@ -209,6 +238,51 @@ def stream(camera_id):
         return "Camera not found", 404
     return Response(stream_generator(camera), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
+@app.route("/api/calibration/operation", methods=["POST"])
+def handle_calibration_operation():
+    operation = request.get_json().get("operation")
+    index = -1
+    camera_id = -1
+
+    with globals.MODE_LOCK:
+        camera_id = globals.CURRENT_MODE["camera_id"]
+
+    frame = camera_list[camera_id].frame
+
+    if operation == "Delete":
+        index = request.get_json().get("index")
+        delete_image(index)
+        return jsonify({"status": "ok"})
+
+    if operation == "Snapshot":
+        index = save_image(frame)
+        return jsonify({"status": "ok", "index": index})
+
+    if operation == "Calibrate":
+        dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'capture', 'calibration_images')
+        calibration_settings = camera_list[camera_id].calibration
+        calibrate_camera(image_dir=dir_path, calibration_settings=calibration_settings)
+        return jsonify({"status": "ok"})
+    
+    return jsonify({"error": "Invalid Operation"}), 404
+
+
+@app.route("/api/calibration_amount", methods=["GET"])
+def get_calibration_amount():
+    dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'capture', 'calibration_images')
+    num_files = len([f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))])
+    return jsonify(num_files)
+
+@app.route('/api/calibration/snapshot_<int:index>')
+def serve_calibration_image(index):
+    image_dir = Path(__file__).resolve().parent / 'capture' / 'calibration_images'
+    file_path = image_dir / f'image_{index}.png'
+
+    if not file_path.exists():
+        return jsonify({"error": "Image not found"}), 404
+
+    return send_file(file_path, mimetype='image/png')
 
 if __name__ == '__main__':
     start_system()

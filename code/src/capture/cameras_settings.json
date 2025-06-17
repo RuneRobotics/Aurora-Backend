@@ -1,2 +1,24 @@
 [
+    {
+        "settings": {
+            "fps": 2,
+            "name": "BIG TEST",
+            "pitch": 0,
+            "roll": 0,
+            "x": 1,
+            "y": 1,
+            "yaw": 0,
+            "z": 1
+        },
+        "lighting": {},
+        "calibration": {
+            "rows": 8,
+            "columns": 8,
+            "sideLength": 0.035,
+            "imageSize": {
+                "width": 640,
+                "height": 480
+            }
+        }
+    }
 ]
