@@ -270,7 +270,13 @@ def handle_calibration_operation():
         for i in range (0, num_files):
             delete_image(0, "calibration_images")
             delete_image(0, "display_images")
-        print("result:", result)
+        
+        with globals.SETTINGS_LOCK:
+            camera_settings, json_path = load_camera_settings()
+            camera_settings[camera_id]["matrix"] = result["matrix"]
+            camera_settings[camera_id]["distortion"] = result["distortion"]
+            save_camera_settings(camera_settings, json_path)
+            globals.SETTINGS_CHANGED = True
         return jsonify({"status": "ok"})
     
     return jsonify({"error": "Invalid Operation"}), 404

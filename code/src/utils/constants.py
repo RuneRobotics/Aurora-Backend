@@ -28,7 +28,9 @@ DEFAULT_CAMERA = {
                         "z": 0
                     },
                     "lighting": {},
-                    "calibration": {}
+                    "calibration": {},
+                    "matrix": [],
+                    "distortion": []
                 }
 
 DEFAULT_CALIBRATION = {

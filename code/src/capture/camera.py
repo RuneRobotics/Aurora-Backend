@@ -55,6 +55,8 @@ class Camera:
         self.settings = camera_dict["settings"]
         self.lighting = camera_dict["lighting"]
         self.calibration = camera_dict["calibration"]
+        self.matrix = camera_dict["matrix"]
+        self.dist_coeffs = camera_dict["distortion"]
 
         try:
             self.pose_on_robot = Pose3D(
@@ -67,12 +69,6 @@ class Camera:
             )
         except Exception:
             # settings error for camera
-            pass
-        try:
-            self.matrix = self.calibration["matrix"]
-            self.dist_coeffs = self.calibration["dist_coeffs"]
-        except Exception:
-            # calibration error for camera
             pass
 
         self.apriltag_detector = AprilTagDetector(matrix=self.matrix, dist_coeffs=self.dist_coeffs, families='tag36h11', season=constants.REEFSCAPE)
@@ -160,7 +156,6 @@ class Camera:
             cv2.drawChessboardCorners(self.display_frame, chessboard_size, corners, found)
 
         try:
-
             with globals.SETTINGS_LOCK:
                 if globals.SETTINGS_CHANGED == True:
                     self.__update_camera()

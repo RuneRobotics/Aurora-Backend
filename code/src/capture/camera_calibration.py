@@ -71,8 +71,8 @@ def calibrate_camera(image_dir, calibration_settings):
     print("Distortion Coefficients:\n", dist)
 
     return {
-        "matrix": matrix.tolist(),
-        "distortion": dist.tolist(),
+        "matrix": matrix,
+        "distortion": dist,
         "num_images": len(objpoints)
     }
 
