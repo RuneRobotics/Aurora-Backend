@@ -55,8 +55,8 @@ class Camera:
         self.settings = camera_dict["settings"]
         self.lighting = camera_dict["lighting"]
         self.calibration = camera_dict["calibration"]
-        self.matrix = camera_dict["matrix"]
-        self.dist_coeffs = camera_dict["distortion"]
+        #self.matrix = camera_dict["matrix"]
+        #self.dist_coeffs = camera_dict["distortion"]
 
         try:
             self.pose_on_robot = Pose3D(

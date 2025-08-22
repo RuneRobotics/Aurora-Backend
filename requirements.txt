@@ -1,6 +1,0 @@
-pyapriltags
-numpy
-scipy
-Flask
-opencv-python
-waitress

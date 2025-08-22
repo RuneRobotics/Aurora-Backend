@@ -1,0 +1,16 @@
+name: Aurora
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - scipy=1.14.1
+  - opencv=4.9.0
+  - pip
+  - pip:
+      - pyapriltags==3.3.0.3
+      - waitress==3.0.2
+      - Flask==3.1.0
