@@ -63,6 +63,8 @@ def update_output(cameras, avg_pose):
         output = data_format(cameras, {}, avg_pose)
 
 
+import json
+
 def data_fusion(cameras):
     global output
     sock = None
@@ -80,10 +82,25 @@ def data_fusion(cameras):
 
         if sock:
             try:
-                data = struct.pack('!6f', avg_pose.x, avg_pose.y, avg_pose.z,
-                                   avg_pose.roll, avg_pose.pitch, avg_pose.yaw)
+                # Example: generate some dummy corals (replace with real detections later)
+                corals = [{"x": 1.0, "y": 2.0}, {"x": 2.5, "y": 3.5}]
+
+                message = {
+                    "pose": {
+                        "x": avg_pose.x,
+                        "y": avg_pose.y,
+                        "z": avg_pose.z,
+                        "roll": avg_pose.roll,
+                        "pitch": avg_pose.pitch,
+                        "yaw": avg_pose.yaw
+                    },
+                    "corals": corals
+                }
+
+                data = json.dumps(message).encode("utf-8") + b"\n"  # newline-delimited JSON
                 sock.sendall(data)
-            except (socket.error, ConnectionResetError):
+
+            except (socket.error, ConnectionResetError, BrokenPipeError):
                 print("Lost connection to the server. Closing socket.")
                 sock.close()
                 sock = None
