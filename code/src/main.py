@@ -109,9 +109,9 @@ def start_system():
     num_of_cams = count_connected_cameras()
     camera_settings, json_path = load_camera_settings()
     num_of_cams_in_file = len(camera_settings)
-
+    
     camera_list = [Camera(cam_id) for cam_id in range(min(num_of_cams_in_file, num_of_cams))]
-
+    
     if num_of_cams < num_of_cams_in_file:
         camera_settings = camera_settings[:num_of_cams]
         save_camera_settings(camera_settings, json_path)

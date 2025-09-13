@@ -19,7 +19,7 @@ class Camera:
         matrix (np.ndarray): Camera matrix containing intrinsic parameters.
         dist_coeffs (np.ndarray): Distortion coefficients for the camera.
         field_pose (Pose3D | None): Pose of the camera in the field coordinate system.
-        frame (np.ndarray | None): Current frame captured by the camera.
+        frame (np.ndarray | None): Current frame captured by the camera.s
     """
 
     def __init__(
@@ -52,11 +52,17 @@ class Camera:
 
         camera_dict = cameras_settings[self.id]
 
+        print("camera_dict keys:", camera_dict.keys())
+        print("camera_dict['distortion']:", camera_dict.get("distortion"))
+        print("type:", type(camera_dict.get("distortion")))
+        print("length:", len(camera_dict.get("distortion") or []))
+
+
         self.settings = camera_dict["settings"]
         self.lighting = camera_dict["lighting"]
         self.calibration = camera_dict["calibration"]
-        #self.matrix = camera_dict["matrix"]
-        #self.dist_coeffs = camera_dict["distortion"]
+        #self.matrix = np.array(camera_dict["matrix"], dtype=np.float32)
+        #self.dist_coeffs = np.array(camera_dict["distortion"], dtype=np.float32).reshape(4, 1)
 
         try:
             self.pose_on_robot = Pose3D(

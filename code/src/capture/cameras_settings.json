@@ -1,24 +1,55 @@
 [
     {
         "settings": {
-            "fps": 2,
-            "name": "BIG TEST",
+            "fps": 60,
+            "name": "Default Camera",
             "pitch": 0,
             "roll": 0,
-            "x": 1,
-            "y": 1,
+            "x": 0,
+            "y": 0,
             "yaw": 0,
-            "z": 1
+            "z": 0
         },
         "lighting": {},
         "calibration": {
-            "rows": 8,
-            "columns": 8,
-            "sideLength": 0.035,
+            "columns": -1,
             "imageSize": {
-                "width": 640,
-                "height": 480
-            }
-        }
+                "height": 480,
+                "width": 640
+            },
+            "rows": -1,
+            "sideLength": -1
+        },
+        "matrix": [
+            [
+                600,
+                0,
+                320
+            ],
+            [
+                0,
+                600,
+                240
+            ],
+            [
+                0,
+                0,
+                1
+            ]
+        ],
+        "distortion": [
+            [
+                0.0
+            ],
+            [
+                0.0
+            ],
+            [
+                0.0
+            ],
+            [
+                0.0
+            ]
+        ]
     }
 ]
