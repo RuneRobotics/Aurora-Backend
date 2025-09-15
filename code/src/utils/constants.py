@@ -1,3 +1,5 @@
+import numpy as np
+
 # seasons
 CRESCENDO = 2024
 REEFSCAPE = 2025
@@ -11,11 +13,19 @@ PURPLE = (255, 110, 200)
 DASHBOARD_PORT = 5800
 
 # metrics
-QUEUE_SIZE = 15
+QUEUE_SIZE = 5
 TAG_HALF_SIZE = 0.5 * ((6.5 * 2.54) / 100)
 UPDATE_INTERVAL = 0.015
 
 # default values
+
+DEDAULT_MATRIX = np.array([
+                                [1200,   0, 640],
+                                [   0, 1200, 480],
+                                [   0,    0,   1]], dtype=np.float32)
+
+DEFAULT_DIST = np.zeros((4, 1), dtype=np.float32)
+
 DEFAULT_CALIBRATION = {
                         "columns": -1,
                         "imageSize": {
@@ -39,7 +49,7 @@ DEFAULT_CAMERA = {
                     },
                     "lighting": {},
                     "calibration": DEFAULT_CALIBRATION,
-                    "matrix": [],
-                    "distortion": []
+                    "matrix": DEDAULT_MATRIX,
+                    "distortion": DEFAULT_DIST
                 }
 

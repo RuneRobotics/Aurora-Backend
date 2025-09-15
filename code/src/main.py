@@ -1,5 +1,6 @@
 from flask import Flask, Response, send_from_directory, jsonify, request, send_file
 from waitress import serve
+import numpy as np
 from queue import Queue
 import threading
 import time
@@ -37,8 +38,13 @@ def load_camera_settings():
 
 
 def save_camera_settings(settings, path):
+    def convert(o):
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return o  # let json handle everything else
+
     with open(path, 'w') as f:
-        json.dump(settings, f, indent=4)
+        json.dump(settings, f, indent=4, default=convert)
 
 
 def validate_camera_id(camera_id, settings):
@@ -117,6 +123,7 @@ def data_fusion(cameras):
                 print("Connection failed. Will retry in 3 seconds.")
                 sock = None
 
+        print((time.time() - start_time))
         time.sleep(max(0, constants.UPDATE_INTERVAL - (time.time() - start_time)))
 
 

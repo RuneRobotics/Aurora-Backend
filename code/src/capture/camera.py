@@ -32,10 +32,9 @@ class Camera:
         self.pose_on_robot = Pose3D()
         self.field_pose: Pose3D | None = None
 
-        self.matrix = np.array([[600, 0, 320], [0, 600, 240], [0, 0, 1]], dtype=np.float32)
-        self.dist_coeffs = np.zeros((4, 1))
         self.robot_pose_queue: Queue[Pose3D] = Queue(maxsize=constants.QUEUE_SIZE)
-
+        self.matrix = None
+        self.dist_coeffs = None
         self.apriltag_detector = None
         self.frame: np.ndarray | None = None
         self.display_frame: np.ndarray | None = None
@@ -61,8 +60,8 @@ class Camera:
         self.settings = camera_dict["settings"]
         self.lighting = camera_dict["lighting"]
         self.calibration = camera_dict["calibration"]
-        #self.matrix = np.array(camera_dict["matrix"], dtype=np.float32)
-        #self.dist_coeffs = np.array(camera_dict["distortion"], dtype=np.float32).reshape(4, 1)
+        self.matrix = np.array(camera_dict["matrix"], dtype=np.float32)
+        self.dist_coeffs = np.array(camera_dict["distortion"], dtype=np.float32)
 
         try:
             self.pose_on_robot = Pose3D(
