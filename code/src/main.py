@@ -9,8 +9,7 @@ import os
 from pathlib import Path
 import json
 import socket
-import struct
-
+import logging
 from capture.camera_manager import open_threads, count_connected_cameras
 from capture.camera import Camera
 from capture.camera_calibration import calibrate_camera, delete_image, save_image
@@ -18,6 +17,8 @@ from slam.sensor_fusion import average_pose3d
 from utils.output_formats import data_format
 from utils import constants
 import globals
+import sys
+from datetime import datetime
 
 app = Flask(__name__, static_folder="networking/dist", static_url_path="")
 
@@ -322,6 +323,41 @@ def serve_calibration_image(index):
 
     return send_file(file_path, mimetype='image/png')
 
+def logging_setup():
+    os.makedirs("logs", exist_ok=True)
+    log_filename = datetime.now().strftime("logs/log_%Y%m%d_%H%M%S.log")
+
+    # Configure root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Remove existing handlers
+    for h in list(logger.handlers):
+        logger.removeHandler(h)
+
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
+
+    # File handler with unique filename
+    file_handler = logging.FileHandler(log_filename, mode="w")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    # Make waitress logs propagate to root logger
+    waitress_logger = logging.getLogger("waitress")
+    waitress_logger.setLevel(logging.DEBUG)
+    waitress_logger.propagate = True
+
+    logger.info(f"Logging initialized → {log_filename}")
+
 if __name__ == '__main__':
+    logging_setup()
     start_system()
     serve(app, host='0.0.0.0', port=constants.DASHBOARD_PORT)

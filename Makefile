@@ -1,10 +1,10 @@
 # Name of your conda environment
 ENV_NAME = Aurora
 
-# Default target
 .PHONY: run
 run:
-	conda run -n $(ENV_NAME) python code/src/main.py
+	@mkdir -p logs; \
+	conda run -n $(ENV_NAME) python -u -X faulthandler code/src/main.py
 
 .PHONY: install
 install:
